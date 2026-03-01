@@ -66,7 +66,7 @@ export function useComparison() {
           completedCount: nextCount,
           isAutoAdvancing: false,
         })
-      }, 2500)
+      }, 1300)
       return { correct: false, isSubmit: true }
     }
 
