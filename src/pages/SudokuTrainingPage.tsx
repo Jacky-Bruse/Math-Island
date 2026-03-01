@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+﻿import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import TrainingShell from '../components/training/TrainingShell'
 import type { TrainingShellContext } from '../components/training/TrainingShell'
@@ -86,7 +86,7 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
   if (sudoku.loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-text-secondary">加载中...</div>
+        <div className="text-text-secondary">鍔犺浇涓?..</div>
       </div>
     )
   }
@@ -94,7 +94,7 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
   if (!sudoku.puzzle) return null
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-between py-2 px-2">
+    <div className="flex-1 flex flex-col items-center justify-between py-2 md:py-3 px-2 md:px-3">
       {/* Board */}
       <div className="flex-1 flex items-center justify-center">
         <SudokuBoard
@@ -113,20 +113,20 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
       </div>
 
       {/* Controls */}
-      <div className="w-full max-w-md space-y-3 pb-4">
+      <div className="w-full max-w-xl space-y-3 md:space-y-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-5">
         <div className="flex justify-center gap-3">
           <button
             onClick={sudoku.useHint}
             disabled={sudoku.hintsRemaining <= 0}
-            className="min-h-12 px-4 rounded-xl bg-secondary-light/30 text-secondary font-semibold active:scale-95 transition-transform disabled:opacity-40"
+            className="min-h-[3.2rem] md:min-h-14 px-4 md:px-6 text-base md:text-lg rounded-xl bg-secondary-light/30 text-secondary font-semibold active:scale-95 transition-transform disabled:opacity-40"
           >
-            💡 提示 ({sudoku.hintsRemaining})
+            馃挕 鎻愮ず ({sudoku.hintsRemaining})
           </button>
           <button
             onClick={handleCheckComplete}
-            className="min-h-12 px-4 rounded-xl bg-success text-white font-semibold active:scale-95 transition-transform"
+            className="min-h-[3.2rem] md:min-h-14 px-4 md:px-6 text-base md:text-lg rounded-xl bg-success text-white font-semibold active:scale-95 transition-transform"
           >
-            ✓ 完成
+            鉁?瀹屾垚
           </button>
         </div>
 
@@ -140,7 +140,7 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
       {/* Idle warning */}
       <ConfirmDialog
         open={idleWarning}
-        title="还在吗？"
+        title="杩樺湪鍚楋紵"
         onConfirm={() => {
           setIdleWarning(false)
           idle.recordAction()
@@ -153,10 +153,10 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
             ctx.exitToHome()
           })()
         }}
-        confirmText="继续"
+        confirmText="缁х画"
         cancelText="保存退出"
       >
-        <p>好像很久没有操作了，还要继续吗？</p>
+        <p>濂藉儚寰堜箙娌℃湁鎿嶄綔浜嗭紝杩樿缁х画鍚楋紵</p>
       </ConfirmDialog>
     </div>
   )
@@ -169,3 +169,5 @@ export default function SudokuTrainingPage() {
     </TrainingShell>
   )
 }
+
+

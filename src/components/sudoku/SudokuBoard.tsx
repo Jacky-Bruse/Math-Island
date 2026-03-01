@@ -14,14 +14,27 @@ interface Props {
 
 export default function SudokuBoard({ board, givens, size, selectedRow, selectedCol, conflicts, highlightedCell, onSelectCell }: Props) {
   const [boxR, boxC] = BOX_SIZES[size]
-  const cellSize = Math.min(Math.floor((window.innerWidth - 32) / size), 56)
+  const boardSize =
+    size === 4
+      ? 'min(clamp(18rem, 62vw, 32rem), 58dvh)'
+      : size === 6
+        ? 'min(clamp(18rem, 68vw, 31rem), 56dvh)'
+        : 'min(clamp(17rem, 72vw, 30rem), 54dvh)'
+  const cellTextSize =
+    size === 4
+      ? 'clamp(1.35rem, 2.8vw, 2rem)'
+      : size === 6
+        ? 'clamp(1.1rem, 2.3vw, 1.65rem)'
+        : 'clamp(0.95rem, 2.1vw, 1.45rem)'
 
   return (
     <div
       className="inline-grid border-2 border-gray-800 rounded-lg overflow-hidden"
       style={{
-        gridTemplateColumns: `repeat(${size}, ${cellSize}px)`,
-        gridTemplateRows: `repeat(${size}, ${cellSize}px)`,
+        width: boardSize,
+        height: boardSize,
+        gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+        gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
       }}
     >
       {board.map((row, r) =>
@@ -50,8 +63,7 @@ export default function SudokuBoard({ board, givens, size, selectedRow, selected
           return (
             <button
               key={`${r}-${c}`}
-              className={`flex items-center justify-center ${borderRight} ${borderBottom} ${bg} transition-colors`}
-              style={{ width: cellSize, height: cellSize }}
+              className={`w-full aspect-square flex items-center justify-center ${borderRight} ${borderBottom} ${bg} transition-colors`}
               onClick={() => onSelectCell(r, c)}
             >
               {val !== 0 && (
@@ -59,7 +71,7 @@ export default function SudokuBoard({ board, givens, size, selectedRow, selected
                   isGiven ? 'text-gray-800' :
                   isConflict ? 'text-danger' :
                   'text-primary'
-                }`}>
+                }`} style={{ fontSize: cellTextSize }}>
                   {val}
                 </span>
               )}

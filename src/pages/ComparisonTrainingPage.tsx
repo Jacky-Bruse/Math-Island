@@ -28,15 +28,15 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
   const { problem, errorCount, hintUsed, hintMessage, showStar, isAutoAdvancing } = comp
 
   return (
-    <div className="flex-1 flex flex-col justify-center items-center px-4">
+    <div className="flex-1 flex flex-col justify-center items-center px-3 sm:px-4 md:px-6">
       {/* Numbers */}
-      <div className={`flex items-center gap-6 mb-10 ${errorCount > 0 && !isAutoAdvancing ? 'animate-shake' : ''}`}>
-        <div className="w-28 h-28 rounded-2xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
-          <span className="text-5xl font-bold">{problem.left}</span>
+      <div className={`flex items-center gap-4 md:gap-6 mb-8 md:mb-10 ${errorCount > 0 && !isAutoAdvancing ? 'animate-shake' : ''}`}>
+        <div className="w-[clamp(6.8rem,20vw,11rem)] h-[clamp(6.8rem,20vw,11rem)] rounded-2xl md:rounded-3xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
+          <span className="text-[clamp(2.6rem,7vw,4.5rem)] font-bold tabular-nums">{problem.left}</span>
         </div>
-        <div className="text-3xl text-text-secondary font-bold">?</div>
-        <div className="w-28 h-28 rounded-2xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
-          <span className="text-5xl font-bold">{problem.right}</span>
+        <div className="text-[clamp(1.8rem,4.6vw,3rem)] text-text-secondary font-bold">?</div>
+        <div className="w-[clamp(6.8rem,20vw,11rem)] h-[clamp(6.8rem,20vw,11rem)] rounded-2xl md:rounded-3xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
+          <span className="text-[clamp(2.6rem,7vw,4.5rem)] font-bold tabular-nums">{problem.right}</span>
         </div>
       </div>
 
@@ -44,7 +44,7 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
       {errorCount >= 1 && !hintUsed && !isAutoAdvancing && (
         <button
           onClick={comp.requestHint}
-          className="min-h-12 px-6 rounded-xl bg-secondary-light/30 text-secondary font-semibold active:scale-95 transition-transform mb-4"
+          className="min-h-[3.2rem] md:min-h-14 px-5 md:px-6 text-base md:text-lg rounded-xl bg-secondary-light/30 text-secondary font-semibold active:scale-95 transition-transform mb-4"
         >
           💡 看提示
         </button>
@@ -53,18 +53,18 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
       <MascotBubble message={hintMessage || ''} visible={!!hintMessage} />
 
       {/* Answer buttons */}
-      <div className="flex gap-6 mt-6">
+      <div className="flex gap-4 md:gap-6 mt-5 md:mt-6">
         <button
           onClick={() => handleAnswer('>')}
           disabled={isAutoAdvancing}
-          className="w-24 h-24 rounded-2xl bg-primary text-white text-4xl font-bold shadow-md active:scale-95 transition-transform disabled:opacity-40"
+          className="w-[clamp(5.4rem,16vw,8.5rem)] h-[clamp(5.4rem,16vw,8.5rem)] rounded-2xl md:rounded-3xl bg-primary text-white text-[clamp(2rem,5.2vw,3.6rem)] font-bold shadow-md active:scale-95 transition-transform disabled:opacity-40"
         >
           &gt;
         </button>
         <button
           onClick={() => handleAnswer('<')}
           disabled={isAutoAdvancing}
-          className="w-24 h-24 rounded-2xl bg-primary text-white text-4xl font-bold shadow-md active:scale-95 transition-transform disabled:opacity-40"
+          className="w-[clamp(5.4rem,16vw,8.5rem)] h-[clamp(5.4rem,16vw,8.5rem)] rounded-2xl md:rounded-3xl bg-primary text-white text-[clamp(2rem,5.2vw,3.6rem)] font-bold shadow-md active:scale-95 transition-transform disabled:opacity-40"
         >
           &lt;
         </button>
