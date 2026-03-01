@@ -55,7 +55,8 @@ function ArithmeticContent({ ctx }: { ctx: TrainingShellContext }) {
             onClick={arith.requestHint}
             className="min-h-[3.2rem] md:min-h-14 px-5 md:px-6 text-base md:text-lg rounded-xl bg-secondary-light/30 text-secondary font-semibold active:scale-95 transition-transform mb-4"
           >
-            馃挕 鐪嬫彁绀?          </button>
+            💡 看提示
+          </button>
         )}
 
         <MascotBubble message={hintMessage || ''} visible={!!hintMessage} />
@@ -84,5 +85,3 @@ export default function ArithmeticTrainingPage() {
     </TrainingShell>
   )
 }
-
-
