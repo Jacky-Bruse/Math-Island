@@ -73,7 +73,7 @@ export function useComparison() {
     setState(prev => ({
       ...prev,
       errorCount: newErrorCount,
-      hintMessage: null,
+      hintMessage: 'No，再试一次',
     }))
     return { correct: false, isSubmit: false }
   }, [state])

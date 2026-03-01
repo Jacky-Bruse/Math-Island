@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from 'react'
 
-type SoundType = 'click' | 'correct' | 'wrong' | 'hint' | 'complete'
+export type SoundType = 'click' | 'correct' | 'wrong' | 'hint' | 'complete'
 
 const audioCtxRef: { current: AudioContext | null } = { current: null }
 

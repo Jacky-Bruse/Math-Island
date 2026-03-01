@@ -14,6 +14,9 @@ function ArithmeticContent({ ctx }: { ctx: TrainingShellContext }) {
 
   const handleConfirm = () => {
     const result = arith.confirm()
+    if (result.correct) {
+      ctx.playSound('correct')
+    }
     if (result.isSubmit && ctx.state.phase === 'continue') {
       ctx.submit()
     }

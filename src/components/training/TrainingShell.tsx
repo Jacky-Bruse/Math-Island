@@ -1,7 +1,8 @@
-import { type ReactNode, useState, useEffect, useCallback } from 'react'
+import { type ReactNode, useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { TrainingState, TrainingModule } from '../../types/training'
 import { useSettings } from '../../hooks/useSettings'
+import { useSound, type SoundType } from '../../hooks/useSound'
 import { useTrainingSession } from '../../hooks/useTrainingSession'
 import { useTrainingTimer } from '../../hooks/useTrainingTimer'
 import MuteToggle from '../shared/MuteToggle'
@@ -21,14 +22,17 @@ export interface TrainingShellContext {
   submit: () => void
   finish: () => void
   exitToHome: () => void
+  playSound: (type: SoundType) => void
   isMuted: boolean
 }
 
 export default function TrainingShell({ module, children }: Props) {
   const navigate = useNavigate()
   const { settings, updateSettings } = useSettings()
+  const { play: playSound } = useSound(!settings.sound)
   const session = useTrainingSession(module)
   const { state, start, triggerCheckpoint, chooseRest, chooseContinueTraining, chooseContinue, restDone, submit, finish, reset } = session
+  const prevPhaseRef = useRef<TrainingState['phase']>(state.phase)
 
   const [elapsed, setElapsed] = useState(0)
   const [exitConfirm, setExitConfirm] = useState(false)
@@ -59,6 +63,14 @@ export default function TrainingShell({ module, children }: Props) {
     return () => clearInterval(timer)
   }, [state])
 
+  // Play completion sound when entering ending phase.
+  useEffect(() => {
+    if (state.phase === 'ending' && prevPhaseRef.current !== 'ending') {
+      playSound('complete')
+    }
+    prevPhaseRef.current = state.phase
+  }, [state.phase, playSound])
+
   const toggleMute = () => updateSettings({ sound: !settings.sound })
 
   const handleBack = () => setExitConfirm(true)
@@ -83,6 +95,7 @@ export default function TrainingShell({ module, children }: Props) {
     submit,
     finish,
     exitToHome,
+    playSound,
     isMuted: !settings.sound,
   }
 

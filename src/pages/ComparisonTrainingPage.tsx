@@ -9,6 +9,9 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
 
   const handleAnswer = (choice: '>' | '<') => {
     const result = comp.answer(choice)
+    if (result.correct) {
+      ctx.playSound('correct')
+    }
     if (result.isSubmit && ctx.state.phase === 'continue') {
       ctx.submit()
     }

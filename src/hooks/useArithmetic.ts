@@ -114,7 +114,7 @@ export function useArithmetic(range: ArithmeticRange) {
       ...prev,
       errorCount: newErrorCount,
       input: '',
-      hintMessage: null,
+      hintMessage: 'No，再试一次',
     }))
     return { correct: false, isSubmit: false }
   }, [state, range])
