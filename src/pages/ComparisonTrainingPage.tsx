@@ -11,6 +11,14 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
     const result = comp.answer(choice)
     if (result.correct) {
       ctx.playSound('correct')
+    } else {
+      ctx.playSound('wrong')
+    }
+    if (!result.correct) {
+      ctx.recordError()
+    }
+    if (result.isSubmit) {
+      ctx.recordCompleted()
     }
     if (result.isSubmit && ctx.state.phase === 'continue') {
       ctx.submit()

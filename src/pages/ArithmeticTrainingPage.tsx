@@ -11,18 +11,29 @@ function ArithmeticContent({ ctx }: { ctx: TrainingShellContext }) {
   const params = useParams()
   const range = (Number(params.range) || 10) as ArithmeticRange
   const arith = useArithmetic(range)
+  const { input } = arith
 
   const handleConfirm = () => {
+    if (input === '') return
+
     const result = arith.confirm()
     if (result.correct) {
       ctx.playSound('correct')
+    } else {
+      ctx.playSound('wrong')
+    }
+    if (!result.correct) {
+      ctx.recordError()
+    }
+    if (result.isSubmit) {
+      ctx.recordCompleted()
     }
     if (result.isSubmit && ctx.state.phase === 'continue') {
       ctx.submit()
     }
   }
 
-  const { problem, input, errorCount, hintUsed, hintMessage, showStar, isAutoAdvancing } = arith
+  const { problem, errorCount, hintUsed, hintMessage, showStar, isAutoAdvancing } = arith
 
   return (
     <div className="flex-1 flex flex-col justify-between">

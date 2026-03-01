@@ -11,6 +11,7 @@ import ConfirmDialog from '../shared/ConfirmDialog'
 import BreakPromptOverlay from './BreakPromptOverlay'
 import RestCountdown from './RestCountdown'
 import EndingOverlay from './EndingOverlay'
+import TrainingSummaryOverlay from './TrainingSummaryOverlay'
 
 interface Props {
   module: TrainingModule
@@ -22,8 +23,15 @@ export interface TrainingShellContext {
   submit: () => void
   finish: () => void
   exitToHome: () => void
+  recordCompleted: (count?: number) => void
+  recordError: (count?: number) => void
   playSound: (type: SoundType) => void
   isMuted: boolean
+}
+
+interface TrainingStats {
+  completedCount: number
+  errorCount: number
 }
 
 export default function TrainingShell({ module, children }: Props) {
@@ -36,6 +44,8 @@ export default function TrainingShell({ module, children }: Props) {
 
   const [elapsed, setElapsed] = useState(0)
   const [exitConfirm, setExitConfirm] = useState(false)
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  const [stats, setStats] = useState<TrainingStats>({ completedCount: 0, errorCount: 0 })
 
   const onCheckpoint = useCallback(triggerCheckpoint, [triggerCheckpoint])
 
@@ -76,14 +86,28 @@ export default function TrainingShell({ module, children }: Props) {
   const handleBack = () => setExitConfirm(true)
   const confirmExit = () => {
     setExitConfirm(false)
-    reset()
-    navigate(-1)
+    setSummaryOpen(true)
   }
 
   const exitToHome = useCallback(() => {
+    setSummaryOpen(true)
+  }, [])
+
+  const recordCompleted = useCallback((count = 1) => {
+    if (count <= 0) return
+    setStats(prev => ({ ...prev, completedCount: prev.completedCount + count }))
+  }, [])
+
+  const recordError = useCallback((count = 1) => {
+    if (count <= 0) return
+    setStats(prev => ({ ...prev, errorCount: prev.errorCount + count }))
+  }, [])
+
+  const finishToHome = useCallback(() => {
+    setSummaryOpen(false)
     reset()
     navigate('/')
-  }, [reset, navigate])
+  }, [navigate, reset])
 
   const minutes = Math.floor(elapsed / 60000)
   const seconds = Math.floor((elapsed % 60000) / 1000)
@@ -95,6 +119,8 @@ export default function TrainingShell({ module, children }: Props) {
     submit,
     finish,
     exitToHome,
+    recordCompleted,
+    recordError,
     playSound,
     isMuted: !settings.sound,
   }
@@ -127,6 +153,9 @@ export default function TrainingShell({ module, children }: Props) {
       {state.phase === 'breakPrompt' && (
         <BreakPromptOverlay
           breakSource={state.breakSource}
+          module={module}
+          completedCount={stats.completedCount}
+          errorCount={stats.errorCount}
           onRest={chooseRest}
           onContinue={state.breakSource === 'midway' ? chooseContinueTraining : chooseContinue}
         />
@@ -139,6 +168,14 @@ export default function TrainingShell({ module, children }: Props) {
       {state.phase === 'ending' && (
         <EndingOverlay onReset={reset} />
       )}
+
+      <TrainingSummaryOverlay
+        open={summaryOpen}
+        module={module}
+        completedCount={stats.completedCount}
+        errorCount={stats.errorCount}
+        onGoHome={finishToHome}
+      />
 
       {/* Exit confirm */}
       <ConfirmDialog

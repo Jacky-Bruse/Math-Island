@@ -74,9 +74,13 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
   const handleCheckComplete = () => {
     const complete = sudoku.checkComplete()
     if (complete) {
+      ctx.recordCompleted(1)
       draft.remove()
       ctx.finish()
+      return
     }
+    ctx.playSound('wrong')
+    ctx.recordError(1)
   }
 
   if (sudoku.loading) {
