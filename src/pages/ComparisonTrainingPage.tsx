@@ -1,8 +1,33 @@
+import { useState, useEffect } from 'react'
 import TrainingShell from '../components/training/TrainingShell'
 import type { TrainingShellContext } from '../components/training/TrainingShell'
 import MascotBubble from '../components/shared/MascotBubble'
 import StarReward from '../components/shared/StarReward'
 import { useComparison } from '../hooks/useComparison'
+
+function HighlightedNumber({
+  value,
+  hintUsed,
+  onesHighlighted,
+}: {
+  value: number
+  hintUsed: boolean
+  onesHighlighted: boolean
+}) {
+  const tens = Math.floor(value / 10)
+  const ones = value % 10
+
+  return (
+    <span className="text-[clamp(2.6rem,7vw,4.5rem)] font-bold tabular-nums">
+      <span className={`transition-colors duration-300 ${hintUsed ? 'text-red-600' : ''}`}>
+        {tens}
+      </span>
+      <span className={`transition-colors duration-300 ${onesHighlighted ? 'text-blue-600' : ''}`}>
+        {ones}
+      </span>
+    </span>
+  )
+}
 
 function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
   const comp = useComparison()
@@ -27,16 +52,27 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
 
   const { problem, errorCount, hintUsed, hintMessage, showStar, isAutoAdvancing } = comp
 
+  const [onesHighlighted, setOnesHighlighted] = useState(false)
+  useEffect(() => {
+    if (!hintUsed) {
+      setOnesHighlighted(false)
+      return
+    }
+    if (!problem.sameTens) return
+    const timer = setTimeout(() => setOnesHighlighted(true), 500)
+    return () => clearTimeout(timer)
+  }, [hintUsed, problem.sameTens])
+
   return (
     <div className="flex-1 flex flex-col justify-center items-center px-3 sm:px-4 md:px-6">
       {/* Numbers */}
       <div className={`flex items-center gap-4 md:gap-6 mb-8 md:mb-10 ${errorCount > 0 && !isAutoAdvancing ? 'animate-shake' : ''}`}>
         <div className="w-[clamp(6.8rem,20vw,11rem)] h-[clamp(6.8rem,20vw,11rem)] rounded-2xl md:rounded-3xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
-          <span className="text-[clamp(2.6rem,7vw,4.5rem)] font-bold tabular-nums">{problem.left}</span>
+          <HighlightedNumber value={problem.left} hintUsed={hintUsed} onesHighlighted={onesHighlighted} />
         </div>
         <div className="text-[clamp(1.8rem,4.6vw,3rem)] text-text-secondary font-bold">?</div>
         <div className="w-[clamp(6.8rem,20vw,11rem)] h-[clamp(6.8rem,20vw,11rem)] rounded-2xl md:rounded-3xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
-          <span className="text-[clamp(2.6rem,7vw,4.5rem)] font-bold tabular-nums">{problem.right}</span>
+          <HighlightedNumber value={problem.right} hintUsed={hintUsed} onesHighlighted={onesHighlighted} />
         </div>
       </div>
 
