@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
-import { getPoem } from '../lib/db'
+import PasswordDialog, { hasAdminAccess } from '../components/shared/PasswordDialog'
+import { fetchPoem } from '../lib/poems-api'
 import { usePoemLibrary } from '../hooks/usePoemLibrary'
 
 export default function PoemEditorPage() {
@@ -21,10 +22,14 @@ export default function PoemEditorPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [loaded, setLoaded] = useState(!isEdit)
 
+  // 密码验证状态
+  const [authenticated, setAuthenticated] = useState(hasAdminAccess())
+  const [showPassword, setShowPassword] = useState(!hasAdminAccess())
+
   // 编辑模式：加载已有数据
   useEffect(() => {
     if (!id) return
-    getPoem(id).then(poem => {
+    fetchPoem(id).then(poem => {
       if (poem) {
         setTitle(poem.title)
         setDynasty(poem.dynasty || '')
@@ -32,8 +37,20 @@ export default function PoemEditorPage() {
         setContent(poem.content)
       }
       setLoaded(true)
+    }).catch(() => {
+      setLoaded(true)
     })
   }, [id])
+
+  const handlePasswordSuccess = () => {
+    setShowPassword(false)
+    setAuthenticated(true)
+  }
+
+  const handlePasswordCancel = () => {
+    setShowPassword(false)
+    navigate(-1)
+  }
 
   const validate = (): boolean => {
     const newErrors: { title?: string; content?: string } = {}
@@ -74,6 +91,19 @@ export default function PoemEditorPage() {
     if (!id) return
     await removePoem(id)
     navigate('/poems', { replace: true })
+  }
+
+  // 密码验证弹窗
+  if (!authenticated) {
+    return (
+      <PageContainer>
+        <PasswordDialog
+          open={showPassword}
+          onSuccess={handlePasswordSuccess}
+          onCancel={handlePasswordCancel}
+        />
+      </PageContainer>
+    )
   }
 
   if (!loaded) {

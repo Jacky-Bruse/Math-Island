@@ -9,4 +9,11 @@ services:
 
   tts-api:
     build: ./tts-service
+    volumes:
+      - tts-data:/app/data
+    environment:
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
     restart: unless-stopped
+
+volumes:
+  tts-data:

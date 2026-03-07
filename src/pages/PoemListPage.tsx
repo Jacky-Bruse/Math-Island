@@ -1,18 +1,47 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
+import PasswordDialog, { hasAdminAccess } from '../components/shared/PasswordDialog'
 import { usePoemLibrary } from '../hooks/usePoemLibrary'
 import { parsePoemsMarkdown, exportPoemsMarkdown } from '../lib/poem-markdown'
+import { AuthError } from '../lib/poems-api'
 
 export default function PoemListPage() {
   const navigate = useNavigate()
   const { poems, loading, importPoems } = usePoemLibrary()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [importResult, setImportResult] = useState<{ added: number; skipped: number } | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [pendingAction, setPendingAction] = useState<'add' | 'import' | null>(null)
+
+  const requirePassword = useCallback((action: 'add' | 'import') => {
+    if (hasAdminAccess()) {
+      if (action === 'add') navigate('/poems/edit')
+      else fileInputRef.current?.click()
+      return
+    }
+    setPendingAction(action)
+    setShowPassword(true)
+  }, [navigate])
+
+  const handlePasswordSuccess = useCallback(() => {
+    setShowPassword(false)
+    if (pendingAction === 'add') {
+      navigate('/poems/edit')
+    } else if (pendingAction === 'import') {
+      fileInputRef.current?.click()
+    }
+    setPendingAction(null)
+  }, [pendingAction, navigate])
+
+  const handlePasswordCancel = useCallback(() => {
+    setShowPassword(false)
+    setPendingAction(null)
+  }, [])
 
   const handleImport = () => {
-    fileInputRef.current?.click()
+    requirePassword('import')
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,8 +57,13 @@ export default function PoemListPage() {
       }
       const result = await importPoems(parsed)
       setImportResult(result)
-    } catch {
-      setImportResult({ added: 0, skipped: 0 })
+    } catch (err) {
+      if (err instanceof AuthError) {
+        setShowPassword(true)
+        setPendingAction('import')
+      } else {
+        setImportResult({ added: 0, skipped: 0 })
+      }
     }
 
     // 清空 input 以便重复选同一文件
@@ -56,7 +90,7 @@ export default function PoemListPage() {
           <BackButton />
           <h1 className="text-2xl font-bold text-text flex-1">古诗阅读</h1>
           <button
-            onClick={() => navigate('/poems/edit')}
+            onClick={() => requirePassword('add')}
             className="min-w-14 min-h-14 flex items-center justify-center rounded-xl bg-poem text-white shadow-sm active:scale-95 transition-transform"
             aria-label="新增古诗"
           >
@@ -89,7 +123,7 @@ export default function PoemListPage() {
             <p className="text-text-secondary mb-2">还没有古诗</p>
             <p className="text-text-secondary text-sm mb-6">点击右上角 + 添加，或导入 Markdown 文件</p>
             <button
-              onClick={() => navigate('/poems/edit')}
+              onClick={() => requirePassword('add')}
               className="px-6 py-3 rounded-xl bg-poem text-white font-semibold active:scale-95 transition-transform"
             >
               添加第一首古诗
@@ -143,6 +177,12 @@ export default function PoemListPage() {
           className="hidden"
         />
       </div>
+
+      <PasswordDialog
+        open={showPassword}
+        onSuccess={handlePasswordSuccess}
+        onCancel={handlePasswordCancel}
+      />
     </PageContainer>
   )
 }

@@ -1,5 +1,4 @@
 import { openDB, type IDBPDatabase } from 'idb'
-import type { Poem } from '../types/poem'
 
 interface MathIslandDB {
   'sudoku-drafts': {
@@ -23,7 +22,7 @@ interface MathIslandDB {
   }
   'poems': {
     key: string
-    value: Poem
+    value: { id: string; [key: string]: unknown }
   }
 }
 
@@ -98,25 +97,4 @@ export async function clearAllDB(): Promise<void> {
   await db.clear('sudoku-drafts')
   await db.clear('sudoku-dedup')
   await db.clear('poems')
-}
-
-// Poem operations
-export async function getAllPoems(): Promise<Poem[]> {
-  const db = await getDB()
-  return db.getAll('poems')
-}
-
-export async function getPoem(id: string): Promise<Poem | undefined> {
-  const db = await getDB()
-  return db.get('poems', id)
-}
-
-export async function savePoem(poem: Poem): Promise<void> {
-  const db = await getDB()
-  await db.put('poems', poem)
-}
-
-export async function deletePoem(id: string): Promise<void> {
-  const db = await getDB()
-  await db.delete('poems', id)
 }

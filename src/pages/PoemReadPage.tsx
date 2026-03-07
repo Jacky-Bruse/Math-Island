@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
 import PoemPlaybackBar from '../components/poem/PoemPlaybackBar'
-import { getPoem } from '../lib/db'
+import PasswordDialog, { hasAdminAccess } from '../components/shared/PasswordDialog'
+import { fetchPoem } from '../lib/poems-api'
 import { checkTtsHealth, getTtsBaseUrl } from '../lib/tts'
 import { usePoemTts } from '../hooks/usePoemTts'
 import { useSettings } from '../hooks/useSettings'
@@ -16,6 +17,7 @@ export default function PoemReadPage() {
   const [poem, setPoem] = useState<Poem | null>(null)
   const [loading, setLoading] = useState(true)
   const [ttsAvailable, setTtsAvailable] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const tts = usePoemTts(poem, settings)
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -23,8 +25,11 @@ export default function PoemReadPage() {
   // 加载古诗
   useEffect(() => {
     if (!id) return
-    getPoem(id).then(p => {
-      setPoem(p || null)
+    fetchPoem(id).then(p => {
+      setPoem(p)
+      setLoading(false)
+    }).catch(() => {
+      setPoem(null)
       setLoading(false)
     })
   }, [id])
@@ -54,6 +59,19 @@ export default function PoemReadPage() {
     if (!settings.poemTtsEnabled || !ttsAvailable) return
     tts.jumpTo(segIndex)
   }, [settings.poemTtsEnabled, ttsAvailable, tts.jumpTo])
+
+  const handleEditClick = () => {
+    if (hasAdminAccess()) {
+      navigate(`/poems/edit/${poem!.id}`)
+      return
+    }
+    setShowPassword(true)
+  }
+
+  const handlePasswordSuccess = () => {
+    setShowPassword(false)
+    navigate(`/poems/edit/${poem!.id}`)
+  }
 
   if (loading) {
     return (
@@ -87,7 +105,7 @@ export default function PoemReadPage() {
           <BackButton />
           <div className="flex-1" />
           <button
-            onClick={() => navigate(`/poems/edit/${poem.id}`)}
+            onClick={handleEditClick}
             className="min-w-14 min-h-14 flex items-center justify-center rounded-xl bg-white/80 shadow-sm active:scale-95 transition-transform"
             aria-label="编辑"
           >
@@ -159,6 +177,12 @@ export default function PoemReadPage() {
         onNext={tts.next}
         onPrev={tts.prev}
         onReplay={tts.replay}
+      />
+
+      <PasswordDialog
+        open={showPassword}
+        onSuccess={handlePasswordSuccess}
+        onCancel={() => setShowPassword(false)}
       />
     </PageContainer>
   )
