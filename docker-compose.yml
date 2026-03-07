@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    depends_on:
+      - tts-api
+    restart: unless-stopped
+
+  tts-api:
+    build: ./tts-service
+    restart: unless-stopped

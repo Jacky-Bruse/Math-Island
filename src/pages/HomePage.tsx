@@ -36,6 +36,15 @@ const modules = [
     border: 'border-sudoku/20',
     icon: '🧩',
   },
+  {
+    key: 'poem',
+    title: '古诗阅读',
+    desc: '朗读与跟读',
+    path: '/poems',
+    color: 'bg-poem-light',
+    border: 'border-poem/20',
+    icon: '📖',
+  },
 ] as const
 
 export default function HomePage() {
@@ -109,7 +118,7 @@ export default function HomePage() {
         confirmText="清空"
         cancelText="取消"
       >
-        <p>将清除所有设置和数独草稿，确定继续吗？</p>
+        <p>将清除所有设置、数独草稿和古诗数据，确定继续吗？</p>
       </ConfirmDialog>
     </PageContainer>
   )

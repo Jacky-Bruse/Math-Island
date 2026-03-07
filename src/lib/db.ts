@@ -1,4 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb'
+import type { Poem } from '../types/poem'
 
 interface MathIslandDB {
   'sudoku-drafts': {
@@ -20,19 +21,24 @@ interface MathIslandDB {
       recentIds: number[]
     }
   }
+  'poems': {
+    key: string
+    value: Poem
+  }
 }
 
 let dbPromise: Promise<IDBPDatabase<MathIslandDB>> | null = null
 
 function getDB(): Promise<IDBPDatabase<MathIslandDB>> {
   if (!dbPromise) {
-    dbPromise = openDB<MathIslandDB>('math-island', 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('sudoku-drafts')) {
+    dbPromise = openDB<MathIslandDB>('math-island', 2, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
           db.createObjectStore('sudoku-drafts', { keyPath: 'id' })
-        }
-        if (!db.objectStoreNames.contains('sudoku-dedup')) {
           db.createObjectStore('sudoku-dedup', { keyPath: 'size' })
+        }
+        if (oldVersion < 2) {
+          db.createObjectStore('poems', { keyPath: 'id' })
         }
       },
     })
@@ -91,4 +97,26 @@ export async function clearAllDB(): Promise<void> {
   const db = await getDB()
   await db.clear('sudoku-drafts')
   await db.clear('sudoku-dedup')
+  await db.clear('poems')
+}
+
+// Poem operations
+export async function getAllPoems(): Promise<Poem[]> {
+  const db = await getDB()
+  return db.getAll('poems')
+}
+
+export async function getPoem(id: string): Promise<Poem | undefined> {
+  const db = await getDB()
+  return db.get('poems', id)
+}
+
+export async function savePoem(poem: Poem): Promise<void> {
+  const db = await getDB()
+  await db.put('poems', poem)
+}
+
+export async function deletePoem(id: string): Promise<void> {
+  const db = await getDB()
+  await db.delete('poems', id)
 }
