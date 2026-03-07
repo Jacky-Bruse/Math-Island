@@ -1,3 +1,5 @@
+export type PoemTtsMode = 'normal' | 'follow'
+
 export interface Settings {
   sound: boolean
   trainingDuration: 15 | 20 | 30
@@ -8,6 +10,8 @@ export interface Settings {
   poemTtsVoice: string
   poemTtsRate: number
   poemTtsPitch: number
+  poemTtsMode: PoemTtsMode
+  poemTtsFollowPauseSeconds: number
   poemReadTitle: boolean
   poemReadMeta: boolean
 }
@@ -22,6 +26,8 @@ export const DEFAULT_SETTINGS: Settings = {
   poemTtsVoice: 'zh-CN-XiaoxiaoNeural',
   poemTtsRate: 1.0,
   poemTtsPitch: 1.0,
+  poemTtsMode: 'normal',
+  poemTtsFollowPauseSeconds: 1.8,
   poemReadTitle: true,
   poemReadMeta: true,
 }

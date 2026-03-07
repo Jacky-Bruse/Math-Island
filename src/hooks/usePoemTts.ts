@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import type { Poem } from '../types/poem'
+import type { Poem, PoemSegment } from '../types/poem'
 import type { Settings } from '../types/settings'
-import type { PoemSegment } from '../types/poem'
+import { getInterSegmentPauseMs } from '../lib/poem-tts-playback'
 import { buildSegments, synthesizeSpeech, getTtsBaseUrl } from '../lib/tts'
 
 export type PlaybackState = 'idle' | 'playing' | 'paused' | 'finished'
@@ -39,16 +39,30 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
     poemTtsVoice,
     poemTtsRate,
     poemTtsPitch,
+    poemTtsMode,
+    poemTtsFollowPauseSeconds,
   } = settings
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const cacheRef = useRef<Map<string, string>>(new Map())
   const preloadRef = useRef<{ index: number; promise: Promise<string> | null }>({ index: -1, promise: null })
+  const pendingNextRef = useRef<{ index: number; timeoutId: number | null }>({ index: -1, timeoutId: null })
   const stateRef = useRef<PlaybackState>('idle')
   const currentIndexRef = useRef(-1)
 
+  const clearPendingNext = useCallback(() => {
+    if (pendingNextRef.current.timeoutId !== null) {
+      window.clearTimeout(pendingNextRef.current.timeoutId)
+    }
+    pendingNextRef.current = { index: -1, timeoutId: null }
+  }, [])
+
   const stopPlayback = useCallback(() => {
+    clearPendingNext()
     if (audioRef.current) {
+      audioRef.current.onplay = null
+      audioRef.current.onended = null
+      audioRef.current.onerror = null
       audioRef.current.pause()
       audioRef.current = null
     }
@@ -56,7 +70,7 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
     setCurrentIndex(-1)
     setError(null)
     preloadRef.current = { index: -1, promise: null }
-  }, [])
+  }, [clearPendingNext])
 
   useEffect(() => {
     stateRef.current = state
@@ -79,6 +93,7 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
 
     return () => {
       stateRef.current = 'idle'
+      clearPendingNext()
       if (audioRef.current) {
         audioRef.current.onplay = null
         audioRef.current.onended = null
@@ -91,7 +106,7 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       }
       cache.clear()
     }
-  }, [])
+  }, [clearPendingNext])
 
   useEffect(() => {
     stopPlayback()
@@ -132,12 +147,17 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
 
   const playSegment = useCallback(async (index: number) => {
     if (index < 0 || index >= segments.length) {
+      clearPendingNext()
       setState('finished')
       setCurrentIndex(segments.length - 1)
       return
     }
 
+    clearPendingNext()
     if (audioRef.current) {
+      audioRef.current.onplay = null
+      audioRef.current.onended = null
+      audioRef.current.onerror = null
       audioRef.current.pause()
       audioRef.current = null
     }
@@ -167,8 +187,21 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       audio.onended = () => {
         const nextIdx = currentIndexRef.current + 1
         if (nextIdx < segments.length) {
-          playSegment(nextIdx)
+          const pauseMs = getInterSegmentPauseMs(
+            poemTtsMode,
+            poemTtsFollowPauseSeconds,
+            segments[index],
+          )
+          pendingNextRef.current = {
+            index: nextIdx,
+            timeoutId: window.setTimeout(() => {
+              pendingNextRef.current = { index: -1, timeoutId: null }
+              if (stateRef.current !== 'playing') return
+              playSegment(nextIdx)
+            }, pauseMs),
+          }
         } else {
+          clearPendingNext()
           setState('finished')
         }
       }
@@ -184,7 +217,14 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       setError('语音合成失败，请检查 TTS 服务')
       setState('idle')
     }
-  }, [segments, getAudioUrl, preloadNext])
+  }, [
+    segments,
+    getAudioUrl,
+    preloadNext,
+    poemTtsMode,
+    poemTtsFollowPauseSeconds,
+    clearPendingNext,
+  ])
 
   const play = useCallback(() => {
     if (!poemTtsEnabled || segments.length === 0) return
@@ -196,15 +236,29 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
     if (audioRef.current && stateRef.current === 'playing') {
       audioRef.current.pause()
       setState('paused')
+      return
     }
-  }, [])
+    if (pendingNextRef.current.index >= 0 && stateRef.current === 'playing') {
+      const nextIndex = pendingNextRef.current.index
+      clearPendingNext()
+      pendingNextRef.current = { index: nextIndex, timeoutId: null }
+      setState('paused')
+    }
+  }, [clearPendingNext])
 
   const resume = useCallback(() => {
     if (audioRef.current && stateRef.current === 'paused') {
       audioRef.current.play()
       setState('playing')
+      return
     }
-  }, [])
+    if (pendingNextRef.current.index >= 0 && stateRef.current === 'paused') {
+      const nextIndex = pendingNextRef.current.index
+      pendingNextRef.current = { index: -1, timeoutId: null }
+      setState('playing')
+      playSegment(nextIndex)
+    }
+  }, [playSegment])
 
   const next = useCallback(() => {
     if (segments.length === 0) return
