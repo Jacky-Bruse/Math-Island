@@ -39,7 +39,7 @@ function parseRichMarkdown(markdown: string): PoemData[] {
     const author = authorMatch?.[1]?.trim()
 
     // 提取 ```text ... ``` 代码块中的正文
-    const contentMatch = trimmed.match(/```text\n([\s\S]*?)```/)
+    const contentMatch = trimmed.match(/```text\r?\n([\s\S]*?)```/)
     if (!contentMatch) continue
 
     const content = contentMatch[1]
