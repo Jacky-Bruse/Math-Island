@@ -1,5 +1,7 @@
 node_modules/
+tts-service/node_modules/
 dist/
+tts-service/dist/
 .git/
 .github/
 .claude/

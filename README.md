@@ -115,18 +115,25 @@ npx tsx scripts/generate-sudoku.ts
 
 ## Docker Compose 部署
 
-项目当前推荐使用 `docker compose` 启动前端和 `tts-service`：
+项目当前推荐使用预编译的单镜像部署，镜像内同时包含前端静态资源、Nginx 和 `tts-service`：
 
 ```bash
-ADMIN_PASSWORD=你的密码 docker compose up --build
+MATH_ISLAND_IMAGE=你的DockerHub用户名/math-island:latest ADMIN_PASSWORD=你的密码 docker compose up -d
 ```
 
 启动后：
 
 - 前端访问：`http://localhost`
-- `web` 使用 Nginx 提供静态资源，并将 `/api/` 代理到 `tts-api`
+- 容器内的 Nginx 提供静态资源，并将 `/api/` 代理到同容器内的 `tts-api`
 - `tts-api` 负责 TTS、古诗数据存储和管理密码校验
-- `tts-data` volume 用于持久化古诗数据
+- `tts-data` volume 用于持久化古诗数据到 `/app/tts-service/data`
+
+如果需要本地生成同款单镜像，可先执行：
+
+```bash
+docker build -t math-island:local .
+MATH_ISLAND_IMAGE=math-island:local ADMIN_PASSWORD=你的密码 docker compose up -d
+```
 
 如果不设置 `ADMIN_PASSWORD`，古诗写操作会返回 403，阅读功能仍可用。
 

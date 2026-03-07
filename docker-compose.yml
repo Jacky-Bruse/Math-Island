@@ -1,16 +1,10 @@
 services:
   web:
-    build: .
+    image: ${MATH_ISLAND_IMAGE:-your-dockerhub-username/math-island:latest}
     ports:
       - "80:80"
-    depends_on:
-      - tts-api
-    restart: unless-stopped
-
-  tts-api:
-    build: ./tts-service
     volumes:
-      - tts-data:/app/data
+      - tts-data:/app/tts-service/data
     environment:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
     restart: unless-stopped
