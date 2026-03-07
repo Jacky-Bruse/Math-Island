@@ -3,9 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
 import PoemPlaybackBar from '../components/poem/PoemPlaybackBar'
+import PoemPageNavigation from '../components/poem/PoemPageNavigation'
 import PasswordDialog from '../components/shared/PasswordDialog'
 import { fetchPoem, hasAdminAccess } from '../lib/poems-api'
+import { getPoemNavigationContext } from '../lib/poem-navigation'
 import { checkTtsHealth, getTtsBaseUrl } from '../lib/tts'
+import { usePoemLibrary } from '../hooks/usePoemLibrary'
 import { usePoemTts } from '../hooks/usePoemTts'
 import { useSettings } from '../hooks/useSettings'
 import type { Poem } from '../types/poem'
@@ -14,6 +17,7 @@ export default function PoemReadPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { settings } = useSettings()
+  const { poems } = usePoemLibrary()
   const [poem, setPoem] = useState<Poem | null>(null)
   const [loading, setLoading] = useState(true)
   const [ttsAvailable, setTtsAvailable] = useState(false)
@@ -22,9 +26,11 @@ export default function PoemReadPage() {
   const tts = usePoemTts(poem, settings)
   const { state, currentIndex, segments, play, pause, resume, stop, next, prev, replay, jumpTo, error } = tts
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
+  const navigation = getPoemNavigationContext(poems, poem?.id ?? id)
 
   useEffect(() => {
     if (!id) return
+    setLoading(true)
     fetchPoem(id).then(p => {
       setPoem(p)
       setLoading(false)
@@ -71,6 +77,11 @@ export default function PoemReadPage() {
     setShowPassword(false)
     navigate(`/poems/edit/${poem!.id}`)
   }
+
+  const handlePoemNavigate = useCallback((poemId: string) => {
+    stop()
+    navigate(`/poems/${poemId}`, { replace: true })
+  }, [navigate, stop])
 
   if (loading) {
     return (
@@ -157,6 +168,37 @@ export default function PoemReadPage() {
             {error}
           </div>
         )}
+
+        {navigation && state === 'finished' ? (
+          <div className="space-y-3">
+            <div className="rounded-3xl border border-poem/15 bg-poem-light/40 px-4 py-4 text-center shadow-sm">
+              <div className="text-sm font-medium text-text-secondary">本首已读完</div>
+              <button
+                type="button"
+                onClick={play}
+                className="mt-3 w-full rounded-2xl bg-poem px-4 py-3 text-sm font-semibold text-white active:scale-[0.98] transition-transform"
+              >
+                再读一遍
+              </button>
+            </div>
+            <PoemPageNavigation
+              previous={navigation.previous}
+              next={navigation.next}
+              currentIndex={navigation.index}
+              total={navigation.total}
+              onNavigate={handlePoemNavigate}
+            />
+          </div>
+        ) : navigation ? (
+          <PoemPageNavigation
+            previous={navigation.previous}
+            next={navigation.next}
+            currentIndex={navigation.index}
+            total={navigation.total}
+            onNavigate={handlePoemNavigate}
+            compact
+          />
+        ) : null}
       </div>
 
       <PoemPlaybackBar
