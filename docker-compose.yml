@@ -1,5 +1,6 @@
 services:
   web:
+    container_name: math-island
     image: ${MATH_ISLAND_IMAGE:-your-dockerhub-username/math-island:latest}
     ports:
       - "80:80"
