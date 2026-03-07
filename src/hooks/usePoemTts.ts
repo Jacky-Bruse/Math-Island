@@ -78,8 +78,14 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
     const cache = cacheRef.current
 
     return () => {
-      audioRef.current?.pause()
-      audioRef.current = null
+      stateRef.current = 'idle'
+      if (audioRef.current) {
+        audioRef.current.onplay = null
+        audioRef.current.onended = null
+        audioRef.current.onerror = null
+        audioRef.current.pause()
+        audioRef.current = null
+      }
       for (const url of cache.values()) {
         URL.revokeObjectURL(url)
       }
