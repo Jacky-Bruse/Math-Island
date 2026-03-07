@@ -3,8 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
-import PasswordDialog, { hasAdminAccess } from '../components/shared/PasswordDialog'
-import { fetchPoem } from '../lib/poems-api'
+import PasswordDialog from '../components/shared/PasswordDialog'
+import { fetchPoem, hasAdminAccess } from '../lib/poems-api'
 import { usePoemLibrary } from '../hooks/usePoemLibrary'
 
 export default function PoemEditorPage() {

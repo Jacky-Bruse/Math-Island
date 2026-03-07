@@ -19,7 +19,10 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
   // 加载语音列表
   useEffect(() => {
     if (!open) return
-    const baseUrl = getTtsBaseUrl(settings)
+    const baseUrl = getTtsBaseUrl({
+      poemTtsUseCustomService: settings.poemTtsUseCustomService,
+      poemTtsServiceUrl: settings.poemTtsServiceUrl,
+    })
     fetchVoices(baseUrl).then(setVoices).catch(() => {})
   }, [open, settings.poemTtsUseCustomService, settings.poemTtsServiceUrl])
 

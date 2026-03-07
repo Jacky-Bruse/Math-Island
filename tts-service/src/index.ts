@@ -152,6 +152,20 @@ app.get('/api/poems', async (_req, res) => {
   res.json(poems)
 })
 
+app.get('/api/poems/export', async (_req, res) => {
+  const poems = await loadPoems()
+  const md = poems
+    .map(p => {
+      const lines = [p.title]
+      const contentLines = p.content.split('\n').filter((l: string) => l.trim().length > 0)
+      lines.push(...contentLines)
+      return lines.join('\n')
+    })
+    .join('\n\n---\n\n')
+  res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+  res.send(md)
+})
+
 // 获取单首古诗
 app.get('/api/poems/:id', async (req, res) => {
   const poems = await loadPoems()

@@ -14,6 +14,10 @@ export function clearCachedPassword(): void {
   sessionStorage.removeItem(SESSION_KEY)
 }
 
+export function hasAdminAccess(): boolean {
+  return !!getCachedPassword()
+}
+
 function adminHeaders(): Record<string, string> {
   const pw = getCachedPassword()
   if (!pw) return {}

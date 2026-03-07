@@ -1,11 +1,14 @@
 import type { Settings } from '../types/settings'
 import type { Poem, PoemSegment } from '../types/poem'
 
+type TtsBaseUrlConfig = Pick<Settings, 'poemTtsUseCustomService' | 'poemTtsServiceUrl'>
+type PoemSegmentSettings = Pick<Settings, 'poemReadTitle' | 'poemReadMeta'>
+
 /**
  * 获取 TTS 服务的基地址。
  * 默认内置模式使用同源 /api，自定义模式使用用户设置的地址。
  */
-export function getTtsBaseUrl(settings: Settings): string {
+export function getTtsBaseUrl(settings: TtsBaseUrlConfig): string {
   if (settings.poemTtsUseCustomService && settings.poemTtsServiceUrl) {
     return settings.poemTtsServiceUrl.replace(/\/+$/, '')
   }
@@ -58,7 +61,7 @@ export async function synthesizeSpeech(
 /**
  * 将古诗转换为朗读段落队列。
  */
-export function buildSegments(poem: Poem, settings: Settings): PoemSegment[] {
+export function buildSegments(poem: Poem, settings: PoemSegmentSettings): PoemSegment[] {
   const segments: PoemSegment[] = []
 
   if (settings.poemReadTitle) {

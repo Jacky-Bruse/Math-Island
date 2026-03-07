@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
 import PoemPlaybackBar from '../components/poem/PoemPlaybackBar'
-import PasswordDialog, { hasAdminAccess } from '../components/shared/PasswordDialog'
-import { fetchPoem } from '../lib/poems-api'
+import PasswordDialog from '../components/shared/PasswordDialog'
+import { fetchPoem, hasAdminAccess } from '../lib/poems-api'
 import { checkTtsHealth, getTtsBaseUrl } from '../lib/tts'
 import { usePoemTts } from '../hooks/usePoemTts'
 import { useSettings } from '../hooks/useSettings'
@@ -20,9 +20,9 @@ export default function PoemReadPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   const tts = usePoemTts(poem, settings)
+  const { state, currentIndex, segments, play, pause, resume, stop, next, prev, replay, jumpTo, error } = tts
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  // 加载古诗
   useEffect(() => {
     if (!id) return
     fetchPoem(id).then(p => {
@@ -34,31 +34,30 @@ export default function PoemReadPage() {
     })
   }, [id])
 
-  // 检测 TTS 健康
   useEffect(() => {
     if (!settings.poemTtsEnabled) return
-    const baseUrl = getTtsBaseUrl(settings)
+    const baseUrl = getTtsBaseUrl({
+      poemTtsUseCustomService: settings.poemTtsUseCustomService,
+      poemTtsServiceUrl: settings.poemTtsServiceUrl,
+    })
     checkTtsHealth(baseUrl).then(setTtsAvailable)
   }, [settings.poemTtsEnabled, settings.poemTtsUseCustomService, settings.poemTtsServiceUrl])
 
-  // 自动滚动到当前高亮行
   useEffect(() => {
-    if (tts.currentIndex < 0) return
-    // segments 中前面可能有 title/meta，需要映射到正文行索引
-    const seg = tts.segments[tts.currentIndex]
+    if (currentIndex < 0) return
+    const seg = segments[currentIndex]
     if (!seg) return
 
-    // 找到对应的 DOM 元素
-    const el = document.querySelector(`[data-segment-index="${tts.currentIndex}"]`)
+    const el = lineRefs.current[currentIndex]
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
-  }, [tts.currentIndex, tts.segments])
+  }, [currentIndex, segments])
 
   const handleSegmentClick = useCallback((segIndex: number) => {
     if (!settings.poemTtsEnabled || !ttsAvailable) return
-    tts.jumpTo(segIndex)
-  }, [settings.poemTtsEnabled, ttsAvailable, tts.jumpTo])
+    jumpTo(segIndex)
+  }, [settings.poemTtsEnabled, ttsAvailable, jumpTo])
 
   const handleEditClick = () => {
     if (hasAdminAccess()) {
@@ -100,7 +99,6 @@ export default function PoemReadPage() {
   return (
     <PageContainer>
       <div className="w-full max-w-md pb-24">
-        {/* 顶部栏 */}
         <div className="flex items-center gap-3 mb-2">
           <BackButton />
           <div className="flex-1" />
@@ -116,12 +114,11 @@ export default function PoemReadPage() {
           </button>
         </div>
 
-        {/* 段落展示区 */}
         <div className="flex flex-col items-center gap-5 py-8">
-          {tts.segments.map((seg, i) => {
-            const isCurrent = i === tts.currentIndex
-            const isRead = tts.currentIndex >= 0 && i < tts.currentIndex
-            const isUnread = tts.currentIndex >= 0 && i > tts.currentIndex
+          {segments.map((seg, i) => {
+            const isCurrent = i === currentIndex
+            const isRead = currentIndex >= 0 && i < currentIndex
+            const isUnread = currentIndex >= 0 && i > currentIndex
 
             let textClass = 'text-text'
             let sizeClass = 'text-2xl'
@@ -155,28 +152,26 @@ export default function PoemReadPage() {
           })}
         </div>
 
-        {/* 错误提示 */}
-        {tts.error && (
+        {error && (
           <div className="text-center text-danger text-sm mb-4">
-            {tts.error}
+            {error}
           </div>
         )}
       </div>
 
-      {/* 播放控制栏 */}
       <PoemPlaybackBar
-        state={tts.state}
-        currentIndex={tts.currentIndex}
-        segmentCount={tts.segments.length}
+        state={state}
+        currentIndex={currentIndex}
+        segmentCount={segments.length}
         ttsEnabled={settings.poemTtsEnabled}
         ttsAvailable={ttsAvailable}
-        onPlay={tts.play}
-        onPause={tts.pause}
-        onResume={tts.resume}
-        onStop={tts.stop}
-        onNext={tts.next}
-        onPrev={tts.prev}
-        onReplay={tts.replay}
+        onPlay={play}
+        onPause={pause}
+        onResume={resume}
+        onStop={stop}
+        onNext={next}
+        onPrev={prev}
+        onReplay={replay}
       />
 
       <PasswordDialog

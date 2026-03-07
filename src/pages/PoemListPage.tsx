@@ -2,10 +2,10 @@ import { useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
-import PasswordDialog, { hasAdminAccess } from '../components/shared/PasswordDialog'
+import PasswordDialog from '../components/shared/PasswordDialog'
 import { usePoemLibrary } from '../hooks/usePoemLibrary'
 import { parsePoemsMarkdown, exportPoemsMarkdown } from '../lib/poem-markdown'
-import { AuthError } from '../lib/poems-api'
+import { AuthError, hasAdminAccess } from '../lib/poems-api'
 
 export default function PoemListPage() {
   const navigate = useNavigate()

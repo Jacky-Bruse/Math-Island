@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { verifyPassword, setCachedPassword, getCachedPassword, AuthError } from '../../lib/poems-api'
+import { verifyPassword, setCachedPassword, AuthError } from '../../lib/poems-api'
 
 interface Props {
   open: boolean
@@ -89,6 +89,3 @@ export default function PasswordDialog({ open, onSuccess, onCancel }: Props) {
  * 检查是否已通过密码验证（sessionStorage 中有缓存）。
  * 如果有缓存，直接返回 true；否则返回 false，调用者应弹出密码弹窗。
  */
-export function hasAdminAccess(): boolean {
-  return !!getCachedPassword()
-}

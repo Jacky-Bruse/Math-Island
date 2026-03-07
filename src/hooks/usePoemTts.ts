@@ -30,6 +30,16 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [error, setError] = useState<string | null>(null)
   const [segments, setSegments] = useState<PoemSegment[]>([])
+  const {
+    poemReadTitle,
+    poemReadMeta,
+    poemTtsEnabled,
+    poemTtsUseCustomService,
+    poemTtsServiceUrl,
+    poemTtsVoice,
+    poemTtsRate,
+    poemTtsPitch,
+  } = settings
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const cacheRef = useRef<Map<string, string>>(new Map())
@@ -37,50 +47,63 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
   const stateRef = useRef<PlaybackState>('idle')
   const currentIndexRef = useRef(-1)
 
-  // 同步 ref
-  useEffect(() => { stateRef.current = state }, [state])
-  useEffect(() => { currentIndexRef.current = currentIndex }, [currentIndex])
+  const stopPlayback = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
+    setState('idle')
+    setCurrentIndex(-1)
+    setError(null)
+    preloadRef.current = { index: -1, promise: null }
+  }, [])
 
-  // 构建 segments
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
+
+  useEffect(() => {
+    currentIndexRef.current = currentIndex
+  }, [currentIndex])
+
   useEffect(() => {
     if (!poem) {
       setSegments([])
       return
     }
-    setSegments(buildSegments(poem, settings))
-  }, [poem, settings.poemReadTitle, settings.poemReadMeta])
+    setSegments(buildSegments(poem, { poemReadTitle, poemReadMeta }))
+  }, [poem, poemReadTitle, poemReadMeta])
 
-  // 组件卸载时清理
   useEffect(() => {
+    const cache = cacheRef.current
+
     return () => {
       audioRef.current?.pause()
       audioRef.current = null
-      // 释放所有 blob URL
-      for (const url of cacheRef.current.values()) {
+      for (const url of cache.values()) {
         URL.revokeObjectURL(url)
       }
-      cacheRef.current.clear()
+      cache.clear()
     }
   }, [])
 
-  // poem 变化时重置
   useEffect(() => {
     stopPlayback()
-    // 释放旧缓存
-    for (const url of cacheRef.current.values()) {
+    const cache = cacheRef.current
+    for (const url of cache.values()) {
       URL.revokeObjectURL(url)
     }
-    cacheRef.current.clear()
-  }, [poem?.id])
+    cache.clear()
+  }, [poem?.id, stopPlayback])
 
   const getAudioUrl = useCallback(async (text: string, retries = 1): Promise<string> => {
-    const key = cacheKey(text, settings.poemTtsVoice, settings.poemTtsRate, settings.poemTtsPitch)
+    const key = cacheKey(text, poemTtsVoice, poemTtsRate, poemTtsPitch)
     const cached = cacheRef.current.get(key)
     if (cached) return cached
 
     try {
-      const baseUrl = getTtsBaseUrl(settings)
-      const blob = await synthesizeSpeech(baseUrl, text, settings.poemTtsVoice, settings.poemTtsRate, settings.poemTtsPitch)
+      const baseUrl = getTtsBaseUrl({ poemTtsUseCustomService, poemTtsServiceUrl })
+      const blob = await synthesizeSpeech(baseUrl, text, poemTtsVoice, poemTtsRate, poemTtsPitch)
       const url = URL.createObjectURL(blob)
       cacheRef.current.set(key, url)
       return url
@@ -90,7 +113,7 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       }
       throw err
     }
-  }, [settings.poemTtsVoice, settings.poemTtsRate, settings.poemTtsPitch, settings.poemTtsUseCustomService, settings.poemTtsServiceUrl])
+  }, [poemTtsVoice, poemTtsRate, poemTtsPitch, poemTtsUseCustomService, poemTtsServiceUrl])
 
   const preloadNext = useCallback((nextIndex: number) => {
     if (nextIndex < 0 || nextIndex >= segments.length) return
@@ -108,7 +131,6 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       return
     }
 
-    // 停止当前音频
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current = null
@@ -119,16 +141,13 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
 
     try {
       let url: string | null = null
-      // 检查预加载
       if (preloadRef.current.index === index && preloadRef.current.promise) {
         url = await preloadRef.current.promise
       }
-      // 预加载失败或未命中时回退到实时请求
       if (!url) {
         url = await getAudioUrl(segments[index].text)
       }
 
-      // 播放可能已被用户停止
       if (stateRef.current === 'idle') return
 
       const audio = new Audio(url)
@@ -136,7 +155,6 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
 
       audio.onplay = () => {
         setState('playing')
-        // 预加载下一句
         preloadNext(index + 1)
       }
 
@@ -163,10 +181,10 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
   }, [segments, getAudioUrl, preloadNext])
 
   const play = useCallback(() => {
-    if (!settings.poemTtsEnabled || segments.length === 0) return
+    if (!poemTtsEnabled || segments.length === 0) return
     setState('playing')
     playSegment(0)
-  }, [settings.poemTtsEnabled, segments, playSegment])
+  }, [poemTtsEnabled, segments, playSegment])
 
   const pause = useCallback(() => {
     if (audioRef.current && stateRef.current === 'playing') {
@@ -180,17 +198,6 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       audioRef.current.play()
       setState('playing')
     }
-  }, [])
-
-  const stopPlayback = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current = null
-    }
-    setState('idle')
-    setCurrentIndex(-1)
-    setError(null)
-    preloadRef.current = { index: -1, promise: null }
   }, [])
 
   const next = useCallback(() => {
