@@ -6,6 +6,7 @@ import type {
   MultiplicationPracticePromptKind,
   PracticeLevel,
 } from '../types/multiplication'
+import type { PoemSegment } from '../types/poem'
 
 const DIGITS = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'] as const
 
@@ -78,6 +79,17 @@ export function getMultiplicationNavigation(a: number, b: MultiplicationGroup): 
     previous: index > 0 ? FACTS[index - 1] : null,
     next: index < FACTS.length - 1 ? FACTS[index + 1] : null,
   }
+}
+
+export function formatMultiplicationEquation(fact: Pick<MultiplicationFact, 'a' | 'b' | 'answer'>): string {
+  return `${fact.a}×${fact.b}=${fact.answer}`
+}
+
+export function buildMultiplicationReadingSegments(facts: MultiplicationFact[]): PoemSegment[] {
+  return facts.map(fact => ({
+    type: 'line',
+    text: fact.chant,
+  }))
 }
 
 export function buildMultiplicationPracticePrompt(

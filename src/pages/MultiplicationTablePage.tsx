@@ -4,16 +4,19 @@ import BackButton from '../components/shared/BackButton'
 import PageContainer from '../components/layout/PageContainer'
 import { useSettings } from '../hooks/useSettings'
 import { useMultiplicationPlayback } from '../hooks/useMultiplicationPlayback'
-import { getMultiplicationFacts, getMultiplicationFactsByGroup } from '../lib/multiplication'
+import {
+  formatMultiplicationEquation,
+  getMultiplicationFacts,
+  getMultiplicationFactsByGroup,
+} from '../lib/multiplication'
 import type { MultiplicationFact, MultiplicationGroup } from '../types/multiplication'
 
 const CONTEXT_KEY = 'math-island:multiplication-context'
+const groups = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 
 function factKey(fact: Pick<MultiplicationFact, 'a' | 'b'>) {
   return `${fact.a}x${fact.b}`
 }
-
-const groups = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 
 export default function MultiplicationTablePage() {
   const navigate = useNavigate()
@@ -47,7 +50,7 @@ export default function MultiplicationTablePage() {
         }
       })
     } catch {
-      // ignore bad restore payload
+      // ignore broken restore payload
     } finally {
       setRestored(true)
     }
@@ -55,8 +58,7 @@ export default function MultiplicationTablePage() {
 
   useEffect(() => {
     if (!playback.currentFact) return
-    const key = factKey(playback.currentFact)
-    const element = cellRefs.current[key]
+    const element = cellRefs.current[factKey(playback.currentFact)]
     element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }, [playback.currentFact])
 
@@ -93,7 +95,7 @@ export default function MultiplicationTablePage() {
           <BackButton />
           <div>
             <h1 className="text-2xl md:text-3xl font-black text-[#9a3412]">九九乘法口诀</h1>
-            <p className="text-sm text-[#9a3412]/70">点一句看演示，按整组读，或从头完整跟读</p>
+            <p className="text-sm text-[#9a3412]/70">点任意算式看苹果演示，按整组读，或从头完整跟读</p>
           </div>
         </div>
 
@@ -101,13 +103,13 @@ export default function MultiplicationTablePage() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#fff3e6] px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-[#c2410c]">
-                Apple Chant Table
+                Apple Formula Table
               </div>
               <h2 className="mt-4 text-3xl md:text-4xl font-black leading-tight text-text">
-                从整张口诀表里读、跟读、理解每一句。
+                用纯数字表格读口诀，再点进去看每一句的意思。
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-text-secondary">
-                完整朗读会按口诀表顺序从头到尾读完，整组朗读只读当前一组，完整跟读会在每句中间留出停顿时间给宝宝跟着读。
+                完整朗读会按口诀表顺序从头读到尾，完整跟读会在每句中间停顿，整组朗读只读当前这一组。
               </p>
             </div>
 
@@ -144,10 +146,10 @@ export default function MultiplicationTablePage() {
               <div>
                 <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#c2410c]/70">Now Playing</div>
                 <div className="mt-1 text-xl font-black text-[#9a3412]">
-                  {playback.currentFact?.chant ?? '选择整张表朗读、跟读，或点某一组朗读'}
+                  {playback.currentFact ? formatMultiplicationEquation(playback.currentFact) : '选择整张表朗读、跟读，或点某一组朗读'}
                 </div>
                 <div className="mt-1 text-sm text-text-secondary">
-                  {playback.queue?.label ?? '点任意口诀格会进入独立演示界面'}
+                  {playback.currentFact?.chant ?? playback.queue?.label ?? '点任意算式会进入独立演示界面'}
                 </div>
               </div>
 
@@ -188,6 +190,7 @@ export default function MultiplicationTablePage() {
                 </button>
               </div>
             </div>
+
             {playback.error && (
               <div className="mt-3 rounded-xl bg-danger-light/20 px-3 py-2 text-sm text-danger">
                 {playback.error}
@@ -236,7 +239,7 @@ function GroupRow({
         <div>
           <div className="text-xs font-bold uppercase tracking-[0.26em] text-[#fb923c]">Group {group}</div>
           <h3 className="mt-1 text-xl font-black text-text">{group} 这一组</h3>
-          <p className="text-sm text-text-secondary">顺序从 1 × {group} 读到 {group} × {group}</p>
+          <p className="text-sm text-text-secondary">顺序从 1×{group} 读到 {group}×{group}</p>
         </div>
         <button
           type="button"
@@ -267,10 +270,10 @@ function GroupRow({
               }`}
             >
               <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#c2410c]/60">
-                {fact.a} × {fact.b}
+                Group {group}
               </div>
-              <div className="mt-2 text-2xl font-black tracking-wide text-[#7c2d12]">
-                {fact.chant}
+              <div className="mt-2 text-[clamp(1.9rem,4vw,2.7rem)] font-black tracking-tight text-[#7c2d12]">
+                {formatMultiplicationEquation(fact)}
               </div>
               <div className="mt-2 text-sm text-text-secondary">
                 点击查看 {fact.meaningText} 的苹果演示

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 
 import {
   buildMultiplicationPracticePrompt,
+  buildMultiplicationReadingSegments,
+  formatMultiplicationEquation,
   generateMultiplicationPracticeItem,
   getMultiplicationFact,
   getMultiplicationFacts,
@@ -94,4 +96,21 @@ test('generates practice items only from the cumulative selected level', () => {
 
   assert.equal(item.fact.b <= 2, true)
   assert.equal(['equation', 'chant-forward', 'chant-reverse'].includes(item.prompt.kind), true)
+})
+
+test('formats multiplication facts as pure numeric equations', () => {
+  const fact = getMultiplicationFact(1, 1)
+  const anotherFact = getMultiplicationFact(3, 4)
+
+  assert.equal(formatMultiplicationEquation(fact), '1×1=1')
+  assert.equal(formatMultiplicationEquation(anotherFact), '3×4=12')
+})
+
+test('builds reading segments from multiplication chants in order', () => {
+  const segments = buildMultiplicationReadingSegments(getMultiplicationFactsByGroup(2))
+
+  assert.deepEqual(segments, [
+    { type: 'line', text: '一二得二' },
+    { type: 'line', text: '二二得四' },
+  ])
 })

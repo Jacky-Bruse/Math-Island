@@ -11,12 +11,12 @@ import { clearAllDB } from '../lib/db'
 const modules = [
   {
     key: 'arithmetic',
-    title: '加减法',
-    desc: '10/20/100以内',
+    title: '算术岛',
+    desc: '加减法 / 乘法口诀',
     path: '/arithmetic',
     color: 'bg-arithmetic-light',
     border: 'border-arithmetic/20',
-    icon: '➕➖',
+    icon: '🔢',
   },
   {
     key: 'comparison',
@@ -25,7 +25,7 @@ const modules = [
     path: '/comparison',
     color: 'bg-comparison-light',
     border: 'border-comparison/20',
-    icon: '🔢',
+    icon: '🔘',
   },
   {
     key: 'sudoku',
@@ -43,7 +43,7 @@ const modules = [
     path: '/poems',
     color: 'bg-poem-light',
     border: 'border-poem/20',
-    icon: '📖',
+    icon: '📚',
   },
 ] as const
 
@@ -76,31 +76,28 @@ export default function HomePage() {
   return (
     <PageContainer className="justify-center">
       <div className="w-full max-w-md">
-        {/* 标题区 */}
         <div className="text-center mb-8" {...longPressProps}>
           <h1 className="text-4xl font-extrabold text-primary mb-1">数力岛</h1>
           <p className="text-text-secondary text-sm">长按此处打开设置</p>
         </div>
 
-        {/* 三张卡片 */}
         <div className="flex flex-col gap-4">
-          {modules.map(m => (
+          {modules.map(module => (
             <button
-              key={m.key}
-              onClick={() => handleNavigate(m.path, m.key)}
-              className={`w-full min-h-24 rounded-2xl ${m.color} border ${m.border} shadow-sm px-6 py-5 flex items-center gap-4 active:scale-[0.98] transition-transform`}
+              key={module.key}
+              onClick={() => handleNavigate(module.path, module.key)}
+              className={`w-full min-h-24 rounded-2xl ${module.color} border ${module.border} shadow-sm px-6 py-5 flex items-center gap-4 active:scale-[0.98] transition-transform`}
             >
-              <span className="text-3xl">{m.icon}</span>
+              <span className="text-3xl">{module.icon}</span>
               <div className="text-left">
-                <div className="text-xl font-bold text-text">{m.title}</div>
-                <div className="text-sm text-text-secondary">{m.desc}</div>
+                <div className="text-xl font-bold text-text">{module.title}</div>
+                <div className="text-sm text-text-secondary">{module.desc}</div>
               </div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* 设置面板 */}
       <SettingsPanel
         open={settingsOpen}
         settings={settings}
@@ -109,7 +106,6 @@ export default function HomePage() {
         onClearData={handleClearData}
       />
 
-      {/* 清空确认 */}
       <ConfirmDialog
         open={clearConfirm}
         title="清空本地数据"
