@@ -1,4 +1,4 @@
-export type TrainingModule = 'arithmetic' | 'comparison' | 'sudoku'
+export type TrainingModule = 'arithmetic' | 'comparison' | 'multiplication' | 'sudoku'
 
 export type BreakSource = 'midway' | 'endpoint'
 

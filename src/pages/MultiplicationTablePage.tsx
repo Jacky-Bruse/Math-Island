@@ -1,0 +1,284 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import BackButton from '../components/shared/BackButton'
+import PageContainer from '../components/layout/PageContainer'
+import { useSettings } from '../hooks/useSettings'
+import { useMultiplicationPlayback } from '../hooks/useMultiplicationPlayback'
+import { getMultiplicationFacts, getMultiplicationFactsByGroup } from '../lib/multiplication'
+import type { MultiplicationFact, MultiplicationGroup } from '../types/multiplication'
+
+const CONTEXT_KEY = 'math-island:multiplication-context'
+
+function factKey(fact: Pick<MultiplicationFact, 'a' | 'b'>) {
+  return `${fact.a}x${fact.b}`
+}
+
+const groups = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
+
+export default function MultiplicationTablePage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { settings } = useSettings()
+  const playback = useMultiplicationPlayback(settings)
+  const [selectedKey, setSelectedKey] = useState<string | null>(null)
+  const [restored, setRestored] = useState(false)
+  const cellRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+
+  const allFacts = useMemo(() => getMultiplicationFacts(), [])
+
+  useEffect(() => {
+    if (restored) return
+
+    try {
+      const raw = sessionStorage.getItem(CONTEXT_KEY)
+      if (!raw) {
+        setRestored(true)
+        return
+      }
+
+      const parsed = JSON.parse(raw) as { scrollY?: number; selectedKey?: string }
+      if (parsed.selectedKey) {
+        setSelectedKey(parsed.selectedKey)
+      }
+
+      requestAnimationFrame(() => {
+        if (typeof parsed.scrollY === 'number') {
+          window.scrollTo({ top: parsed.scrollY })
+        }
+      })
+    } catch {
+      // ignore bad restore payload
+    } finally {
+      setRestored(true)
+    }
+  }, [restored])
+
+  useEffect(() => {
+    if (!playback.currentFact) return
+    const key = factKey(playback.currentFact)
+    const element = cellRefs.current[key]
+    element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [playback.currentFact])
+
+  useEffect(() => {
+    return () => playback.stop()
+  }, [playback])
+
+  useEffect(() => {
+    const state = location.state as { selectedKey?: string } | null
+    if (state?.selectedKey) {
+      setSelectedKey(state.selectedKey)
+    }
+  }, [location.state])
+
+  const activeKey = playback.currentFact ? factKey(playback.currentFact) : selectedKey
+
+  const handleOpenUnderstand = (fact: MultiplicationFact) => {
+    const nextKey = factKey(fact)
+    setSelectedKey(nextKey)
+    sessionStorage.setItem(CONTEXT_KEY, JSON.stringify({
+      scrollY: window.scrollY,
+      selectedKey: nextKey,
+    }))
+    playback.stop()
+    navigate(`/arithmetic/multiplication/understand/${fact.a}/${fact.b}`, {
+      state: { selectedKey: nextKey },
+    })
+  }
+
+  return (
+    <PageContainer className="bg-[radial-gradient(circle_at_top,#fff8ef_0%,#fff1e8_32%,#fffdfb_100%)]">
+      <div className="w-full max-w-5xl">
+        <div className="flex items-center gap-3 mb-5">
+          <BackButton />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black text-[#9a3412]">九九乘法口诀</h1>
+            <p className="text-sm text-[#9a3412]/70">点一句看演示，按整组读，或从头完整跟读</p>
+          </div>
+        </div>
+
+        <section className="rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(255,239,229,0.92))] px-5 py-5 shadow-[0_28px_60px_rgba(249,115,22,0.14)]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#fff3e6] px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-[#c2410c]">
+                Apple Chant Table
+              </div>
+              <h2 className="mt-4 text-3xl md:text-4xl font-black leading-tight text-text">
+                从整张口诀表里读、跟读、理解每一句。
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-text-secondary">
+                完整朗读会按口诀表顺序从头到尾读完，整组朗读只读当前一组，完整跟读会在每句中间留出停顿时间给宝宝跟着读。
+              </p>
+            </div>
+
+            <div className="grid w-full gap-3 sm:grid-cols-3 lg:w-auto">
+              <button
+                type="button"
+                onClick={() => playback.start(allFacts, 'full-read', '完整朗读')}
+                className="min-h-14 rounded-2xl bg-[#ea580c] px-5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(234,88,12,0.26)] active:scale-[0.98] transition-transform"
+              >
+                完整朗读
+              </button>
+              <button
+                type="button"
+                onClick={() => playback.start(allFacts, 'full-follow', '完整跟读')}
+                className="min-h-14 rounded-2xl bg-[#fb923c] px-5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(251,146,60,0.28)] active:scale-[0.98] transition-transform"
+              >
+                完整跟读
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playback.stop()
+                  navigate('/arithmetic/multiplication/practice')
+                }}
+                className="min-h-14 rounded-2xl border border-[#fdba74] bg-white px-5 text-sm font-bold text-[#c2410c] active:scale-[0.98] transition-transform"
+              >
+                口诀练习
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-[1.5rem] border border-[#fed7aa] bg-white/80 px-4 py-4 shadow-sm">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#c2410c]/70">Now Playing</div>
+                <div className="mt-1 text-xl font-black text-[#9a3412]">
+                  {playback.currentFact?.chant ?? '选择整张表朗读、跟读，或点某一组朗读'}
+                </div>
+                <div className="mt-1 text-sm text-text-secondary">
+                  {playback.queue?.label ?? '点任意口诀格会进入独立演示界面'}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {playback.state === 'playing' ? (
+                  <button
+                    type="button"
+                    onClick={playback.pause}
+                    className="min-h-11 rounded-xl bg-[#fff7ed] px-4 text-sm font-semibold text-[#c2410c] active:scale-95 transition-transform"
+                  >
+                    暂停
+                  </button>
+                ) : playback.state === 'paused' ? (
+                  <button
+                    type="button"
+                    onClick={playback.resume}
+                    className="min-h-11 rounded-xl bg-[#ea580c] px-4 text-sm font-semibold text-white active:scale-95 transition-transform"
+                  >
+                    继续
+                  </button>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={playback.replay}
+                  disabled={!playback.queue}
+                  className="min-h-11 rounded-xl bg-[#fff7ed] px-4 text-sm font-semibold text-[#c2410c] active:scale-95 transition-transform disabled:opacity-40"
+                >
+                  重读当前
+                </button>
+                <button
+                  type="button"
+                  onClick={playback.stop}
+                  disabled={playback.state === 'idle'}
+                  className="min-h-11 rounded-xl bg-[#fef2f2] px-4 text-sm font-semibold text-danger active:scale-95 transition-transform disabled:opacity-40"
+                >
+                  停止
+                </button>
+              </div>
+            </div>
+            {playback.error && (
+              <div className="mt-3 rounded-xl bg-danger-light/20 px-3 py-2 text-sm text-danger">
+                {playback.error}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="mt-6 space-y-4">
+          {groups.map(group => (
+            <GroupRow
+              key={group}
+              group={group}
+              activeKey={activeKey}
+              onPlayGroup={(targetGroup) => playback.start(getMultiplicationFactsByGroup(targetGroup), 'group-read', `${targetGroup}这一组`)}
+              onOpenUnderstand={handleOpenUnderstand}
+              registerCell={(key, element) => {
+                cellRefs.current[key] = element
+              }}
+            />
+          ))}
+        </section>
+      </div>
+    </PageContainer>
+  )
+}
+
+function GroupRow({
+  group,
+  activeKey,
+  onPlayGroup,
+  onOpenUnderstand,
+  registerCell,
+}: {
+  group: MultiplicationGroup
+  activeKey: string | null
+  onPlayGroup: (group: MultiplicationGroup) => void
+  onOpenUnderstand: (fact: MultiplicationFact) => void
+  registerCell: (key: string, element: HTMLButtonElement | null) => void
+}) {
+  const facts = getMultiplicationFactsByGroup(group)
+
+  return (
+    <div className="rounded-[1.75rem] border border-white/70 bg-white/78 px-4 py-4 shadow-[0_18px_36px_rgba(249,115,22,0.08)] backdrop-blur-sm">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <div className="text-xs font-bold uppercase tracking-[0.26em] text-[#fb923c]">Group {group}</div>
+          <h3 className="mt-1 text-xl font-black text-text">{group} 这一组</h3>
+          <p className="text-sm text-text-secondary">顺序从 1 × {group} 读到 {group} × {group}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onPlayGroup(group)}
+          className="min-h-12 rounded-2xl bg-[#fff3e6] px-4 text-sm font-bold text-[#c2410c] active:scale-[0.98] transition-transform"
+        >
+          朗读这一组
+        </button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {facts.map(fact => {
+          const key = factKey(fact)
+          const active = key === activeKey
+
+          return (
+            <button
+              key={key}
+              ref={element => {
+                registerCell(key, element)
+              }}
+              type="button"
+              onClick={() => onOpenUnderstand(fact)}
+              className={`group rounded-[1.5rem] border px-4 py-4 text-left transition-all duration-300 active:scale-[0.98] ${
+                active
+                  ? 'border-[#fb923c] bg-[linear-gradient(145deg,#fff1e7,#ffffff)] shadow-[0_16px_30px_rgba(251,146,60,0.18)]'
+                  : 'border-[#ffedd5] bg-[#fffdfb] hover:border-[#fdba74]'
+              }`}
+            >
+              <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#c2410c]/60">
+                {fact.a} × {fact.b}
+              </div>
+              <div className="mt-2 text-2xl font-black tracking-wide text-[#7c2d12]">
+                {fact.chant}
+              </div>
+              <div className="mt-2 text-sm text-text-secondary">
+                点击查看 {fact.meaningText} 的苹果演示
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
