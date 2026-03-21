@@ -23,6 +23,7 @@ export default function MultiplicationTablePage() {
   const location = useLocation()
   const { settings } = useSettings()
   const playback = useMultiplicationPlayback(settings)
+  const { stop } = playback
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [restored, setRestored] = useState(false)
   const cellRefs = useRef<Record<string, HTMLButtonElement | null>>({})
@@ -63,8 +64,8 @@ export default function MultiplicationTablePage() {
   }, [playback.currentFact])
 
   useEffect(() => {
-    return () => playback.stop()
-  }, [playback])
+    return () => stop()
+  }, [stop])
 
   useEffect(() => {
     const state = location.state as { selectedKey?: string } | null
@@ -82,7 +83,7 @@ export default function MultiplicationTablePage() {
       scrollY: window.scrollY,
       selectedKey: nextKey,
     }))
-    playback.stop()
+    stop()
     navigate(`/arithmetic/multiplication/understand/${fact.a}/${fact.b}`, {
       state: { selectedKey: nextKey },
     })
@@ -131,7 +132,7 @@ export default function MultiplicationTablePage() {
               <button
                 type="button"
                 onClick={() => {
-                  playback.stop()
+                  stop()
                   navigate('/arithmetic/multiplication/practice')
                 }}
                 className="min-h-14 rounded-2xl border border-[#fdba74] bg-white px-5 text-sm font-bold text-[#c2410c] active:scale-[0.98] transition-transform"
@@ -182,7 +183,7 @@ export default function MultiplicationTablePage() {
                 </button>
                 <button
                   type="button"
-                  onClick={playback.stop}
+                    onClick={stop}
                   disabled={playback.state === 'idle'}
                   className="min-h-11 rounded-xl bg-[#fef2f2] px-4 text-sm font-semibold text-danger active:scale-95 transition-transform disabled:opacity-40"
                 >
