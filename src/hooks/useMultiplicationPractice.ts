@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MultiplicationFact, PracticeLevel } from '../types/multiplication'
 import {
   buildMultiplicationPracticePrompt,
@@ -50,6 +50,41 @@ function getFullExplanation(fact: MultiplicationFact): string {
 
 export function useMultiplicationPractice(level: PracticeLevel) {
   const [state, setState] = useState<PracticeState>(() => createPracticeState(level, 0))
+  const stateRef = useRef(state)
+  const levelRef = useRef(level)
+  const previousLevelRef = useRef(level)
+  const pendingNextRef = useRef<number | null>(null)
+
+  stateRef.current = state
+  levelRef.current = level
+
+  const clearPendingNext = useCallback(() => {
+    if (pendingNextRef.current !== null) {
+      window.clearTimeout(pendingNextRef.current)
+      pendingNextRef.current = null
+    }
+  }, [])
+
+  const scheduleNext = useCallback((nextCount: number, delay: number) => {
+    clearPendingNext()
+    pendingNextRef.current = window.setTimeout(() => {
+      pendingNextRef.current = null
+      setState(createPracticeState(levelRef.current, nextCount))
+    }, delay)
+  }, [clearPendingNext])
+
+  useEffect(() => {
+    if (previousLevelRef.current === level) return
+    previousLevelRef.current = level
+    clearPendingNext()
+    setState(createPracticeState(level, 0))
+  }, [clearPendingNext, level])
+
+  useEffect(() => {
+    return () => {
+      clearPendingNext()
+    }
+  }, [clearPendingNext])
 
   const inputDigit = useCallback((digit: number) => {
     setState(prev => {
@@ -83,7 +118,7 @@ export function useMultiplicationPractice(level: PracticeLevel) {
   }, [])
 
   const confirm = useCallback((): { correct: boolean; isSubmit: boolean } => {
-    const current = state
+    const current = stateRef.current
     if (current.isAutoAdvancing || current.input === '') return { correct: false, isSubmit: false }
 
     const correct = current.input === current.answer
@@ -91,9 +126,7 @@ export function useMultiplicationPractice(level: PracticeLevel) {
     if (correct) {
       const nextCount = current.completedCount + 1
       setState(prev => ({ ...prev, showStar: true, isAutoAdvancing: true }))
-      setTimeout(() => {
-        setState(createPracticeState(level, nextCount))
-      }, 800)
+      scheduleNext(nextCount, 800)
       return { correct: true, isSubmit: true }
     }
 
@@ -107,9 +140,7 @@ export function useMultiplicationPractice(level: PracticeLevel) {
         input: '',
         isAutoAdvancing: true,
       }))
-      setTimeout(() => {
-        setState(createPracticeState(level, nextCount))
-      }, 1400)
+      scheduleNext(nextCount, 1400)
       return { correct: false, isSubmit: true }
     }
 
@@ -120,7 +151,7 @@ export function useMultiplicationPractice(level: PracticeLevel) {
       hintMessage: '再试一次',
     }))
     return { correct: false, isSubmit: false }
-  }, [level, state])
+  }, [scheduleNext])
 
   return {
     fact: state.fact,

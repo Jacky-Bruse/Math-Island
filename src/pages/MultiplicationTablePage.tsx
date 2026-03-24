@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import BackButton from '../components/shared/BackButton'
 import PageContainer from '../components/layout/PageContainer'
@@ -18,12 +18,23 @@ function factKey(fact: Pick<MultiplicationFact, 'a' | 'b'>) {
   return `${fact.a}x${fact.b}`
 }
 
+function getGroupFromFactKey(key: string | null): MultiplicationGroup | null {
+  if (!key) return null
+
+  const group = Number(key.split('x')[1])
+  if (!Number.isInteger(group) || group < 1 || group > 9) {
+    return null
+  }
+
+  return group as MultiplicationGroup
+}
+
 export default function MultiplicationTablePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { settings } = useSettings()
   const playback = useMultiplicationPlayback(settings)
-  const { stop } = playback
+  const { currentFact, error, pause, queue, replay, resume, start, state, stop } = playback
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [restored, setRestored] = useState(false)
   const cellRefs = useRef<Record<string, HTMLButtonElement | null>>({})
@@ -58,10 +69,10 @@ export default function MultiplicationTablePage() {
   }, [restored])
 
   useEffect(() => {
-    if (!playback.currentFact) return
-    const element = cellRefs.current[factKey(playback.currentFact)]
+    if (!currentFact) return
+    const element = cellRefs.current[factKey(currentFact)]
     element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [playback.currentFact])
+  }, [currentFact])
 
   useEffect(() => {
     return () => stop()
@@ -74,9 +85,18 @@ export default function MultiplicationTablePage() {
     }
   }, [location.state])
 
-  const activeKey = playback.currentFact ? factKey(playback.currentFact) : selectedKey
+  const activeKey = currentFact ? factKey(currentFact) : selectedKey
+  const activeGroup = currentFact?.b ?? getGroupFromFactKey(selectedKey)
 
-  const handleOpenUnderstand = (fact: MultiplicationFact) => {
+  const registerCell = useCallback((key: string, element: HTMLButtonElement | null) => {
+    cellRefs.current[key] = element
+  }, [])
+
+  const handlePlayGroup = useCallback((targetGroup: MultiplicationGroup) => {
+    start(getMultiplicationFactsByGroup(targetGroup), 'group-read', `${targetGroup}这一组`)
+  }, [start])
+
+  const handleOpenUnderstand = useCallback((fact: MultiplicationFact) => {
     const nextKey = factKey(fact)
     setSelectedKey(nextKey)
     sessionStorage.setItem(CONTEXT_KEY, JSON.stringify({
@@ -87,7 +107,7 @@ export default function MultiplicationTablePage() {
     navigate(`/arithmetic/multiplication/understand/${fact.a}/${fact.b}`, {
       state: { selectedKey: nextKey },
     })
-  }
+  }, [navigate, stop])
 
   return (
     <PageContainer className="bg-[radial-gradient(circle_at_top,#fff8ef_0%,#fff1e8_32%,#fffdfb_100%)]">
@@ -115,14 +135,14 @@ export default function MultiplicationTablePage() {
               <div className="grid w-full gap-3 sm:grid-cols-3 lg:w-auto">
                 <button
                   type="button"
-                  onClick={() => playback.start(allFacts, 'full-read', '完整朗读')}
+                  onClick={() => start(allFacts, 'full-read', '完整朗读')}
                   className="min-h-14 rounded-2xl bg-[#ea580c] px-5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(234,88,12,0.26)] active:scale-[0.98] transition-transform"
                 >
                   完整朗读
                 </button>
                 <button
                   type="button"
-                  onClick={() => playback.start(allFacts, 'full-follow', '完整跟读')}
+                  onClick={() => start(allFacts, 'full-follow', '完整跟读')}
                   className="min-h-14 rounded-2xl bg-[#fb923c] px-5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(251,146,60,0.28)] active:scale-[0.98] transition-transform"
                 >
                   完整跟读
@@ -145,26 +165,26 @@ export default function MultiplicationTablePage() {
                 <div>
                   <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#c2410c]/70">Now Playing</div>
                   <div className="mt-1 text-xl font-black text-[#9a3412]">
-                    {playback.currentFact ? formatMultiplicationEquation(playback.currentFact) : '选择整张表朗读、跟读，或点某一组朗读'}
+                    {currentFact ? formatMultiplicationEquation(currentFact) : '选择整张表朗读、跟读，或点某一组朗读'}
                   </div>
                   <div className="mt-1 text-sm text-text-secondary">
-                    {playback.currentFact?.chant ?? playback.queue?.label ?? '点任意算式会进入独立演示界面'}
+                    {currentFact?.chant ?? queue?.label ?? '点任意算式会进入独立演示界面'}
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {playback.state === 'playing' ? (
+                  {state === 'playing' ? (
                     <button
                       type="button"
-                      onClick={playback.pause}
+                      onClick={pause}
                       className="min-h-11 rounded-xl bg-[#fff7ed] px-4 text-sm font-semibold text-[#c2410c] active:scale-95 transition-transform"
                     >
                       暂停
                     </button>
-                  ) : playback.state === 'paused' ? (
+                  ) : state === 'paused' ? (
                     <button
                       type="button"
-                      onClick={playback.resume}
+                      onClick={resume}
                       className="min-h-11 rounded-xl bg-[#ea580c] px-4 text-sm font-semibold text-white active:scale-95 transition-transform"
                     >
                       继续
@@ -173,8 +193,8 @@ export default function MultiplicationTablePage() {
 
                   <button
                     type="button"
-                    onClick={playback.replay}
-                    disabled={!playback.queue}
+                    onClick={replay}
+                    disabled={!queue}
                     className="min-h-11 rounded-xl bg-[#fff7ed] px-4 text-sm font-semibold text-[#c2410c] active:scale-95 transition-transform disabled:opacity-40"
                   >
                     重读当前
@@ -182,7 +202,7 @@ export default function MultiplicationTablePage() {
                   <button
                     type="button"
                     onClick={stop}
-                    disabled={playback.state === 'idle'}
+                    disabled={state === 'idle'}
                     className="min-h-11 rounded-xl bg-[#fef2f2] px-4 text-sm font-semibold text-danger active:scale-95 transition-transform disabled:opacity-40"
                   >
                     停止
@@ -190,9 +210,9 @@ export default function MultiplicationTablePage() {
                 </div>
               </div>
 
-              {playback.error && (
+              {error && (
                 <div className="mt-3 rounded-xl bg-danger-light/20 px-3 py-2 text-sm text-danger">
-                  {playback.error}
+                  {error}
                 </div>
               )}
             </div>
@@ -204,12 +224,10 @@ export default function MultiplicationTablePage() {
             <GroupRow
               key={group}
               group={group}
-              activeKey={activeKey}
-              onPlayGroup={(targetGroup) => playback.start(getMultiplicationFactsByGroup(targetGroup), 'group-read', `${targetGroup}这一组`)}
+              activeKey={activeGroup === group ? activeKey : null}
+              onPlayGroup={handlePlayGroup}
               onOpenUnderstand={handleOpenUnderstand}
-              registerCell={(key, element) => {
-                cellRefs.current[key] = element
-              }}
+              registerCell={registerCell}
             />
           ))}
         </section>
@@ -218,7 +236,7 @@ export default function MultiplicationTablePage() {
   )
 }
 
-function GroupRow({
+const GroupRow = memo(function GroupRow({
   group,
   activeKey,
   onPlayGroup,
@@ -284,4 +302,4 @@ function GroupRow({
       </div>
     </div>
   )
-}
+})

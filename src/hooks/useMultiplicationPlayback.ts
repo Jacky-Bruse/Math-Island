@@ -30,6 +30,10 @@ export function useMultiplicationPlayback(settings: Settings) {
   const currentIndexRef = useRef(-1)
   const stateRef = useRef<MultiplicationPlaybackState>('idle')
 
+  stateRef.current = state
+  currentIndexRef.current = currentIndex
+  queueRef.current = queue
+
   const clearPendingNext = useCallback(() => {
     if (pendingNextRef.current.timeoutId !== null) {
       window.clearTimeout(pendingNextRef.current.timeoutId)
@@ -52,18 +56,6 @@ export function useMultiplicationPlayback(settings: Settings) {
     setError(null)
     preloadRef.current = { index: -1, promise: null }
   }, [clearPendingNext])
-
-  useEffect(() => {
-    stateRef.current = state
-  }, [state])
-
-  useEffect(() => {
-    currentIndexRef.current = currentIndex
-  }, [currentIndex])
-
-  useEffect(() => {
-    queueRef.current = queue
-  }, [queue])
 
   useEffect(() => {
     const cache = cacheRef.current
