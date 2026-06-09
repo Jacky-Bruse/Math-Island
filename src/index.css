@@ -11,6 +11,10 @@
   --color-danger-light: #fca5a5;
   --color-bg: #f0f4ff;
   --color-card: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
   --color-text: #1e293b;
   --color-text-secondary: #64748b;
   --color-arithmetic: #6366f1;
@@ -26,6 +30,29 @@
   --font-family-base: 'Nunito', system-ui, -apple-system, sans-serif;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+}
+
+/*
+ * 深色主题覆盖（暖棕灰基调）。
+ * 必须是 unlayered（非 @layer）规则：CSS 层级优先于特异性，
+ * unlayered 才能稳定胜过 @layer theme 里 :root 的浅色默认值。
+ * 详见 docs/plans/2026-06-08-dark-mode-design.md §3.4。
+ */
+.dark {
+  color-scheme: dark;
+  --color-bg: #1c1917;
+  --color-card: #292524;
+  --color-surface: #292524;
+  --color-surface-muted: #322c28;
+  --color-border: #3f3833;
+  --color-border-strong: #4a4039;
+  --color-text: #ede9e4;
+  --color-text-secondary: #a8a29e;
+  --color-arithmetic-light: #28253a;
+  --color-comparison-light: #322a1c;
+  --color-sudoku-light: #1d2e26;
+  --color-poem-light: #2b2336;
+  --color-multiplication-light: #2e2419;
 }
 
 @layer base {

@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Settings } from '../types/settings'
+import type { Settings, ThemeMode } from '../types/settings'
 import { fetchVoices, getTtsBaseUrl, checkTtsHealth } from '../lib/tts'
+import { applyTheme } from '../lib/theme'
+
+const THEME_OPTIONS: { value: ThemeMode; label: string; icon: string }[] = [
+  { value: 'light', label: '浅色', icon: '☀️' },
+  { value: 'dark', label: '深色', icon: '🌙' },
+  { value: 'system', label: '跟随系统', icon: '🖥️' },
+]
 
 interface Props {
   open: boolean
@@ -88,14 +95,14 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30" onClick={onClose}>
       <div
-        className="bg-white rounded-t-3xl shadow-xl w-full max-w-lg p-6 pb-8 animate-slide-up max-h-[85dvh] overflow-y-auto"
+        className="bg-surface rounded-t-3xl shadow-xl w-full max-w-lg p-6 pb-8 animate-slide-up max-h-[85dvh] overflow-y-auto"
         onClick={event => event.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">设置</h2>
           <button
             onClick={onClose}
-            className="min-w-10 min-h-10 flex items-center justify-center rounded-full bg-gray-100 active:scale-95 transition-transform"
+            className="min-w-10 min-h-10 flex items-center justify-center rounded-full bg-surface-muted active:scale-95 transition-transform"
             aria-label="关闭"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -105,17 +112,34 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
           </button>
         </div>
 
-        <div className="flex items-center justify-between py-3 border-b border-gray-100">
+        <div className="py-3 border-b border-border">
+          <span className="font-medium">主题</span>
+          <div className="flex gap-2 mt-2">
+            {THEME_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => { onUpdate({ theme: opt.value }); applyTheme(opt.value) }}
+                className={`flex-1 min-h-12 rounded-xl font-semibold transition-colors ${
+                  settings.theme === opt.value ? 'bg-primary text-white' : 'bg-surface-muted text-text'
+                }`}
+              >
+                <span className="mr-1">{opt.icon}</span>{opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between py-3 border-b border-border">
           <span className="font-medium">声音</span>
           <button
             onClick={() => onUpdate({ sound: !settings.sound })}
-            className={`w-14 h-8 rounded-full transition-colors relative ${settings.sound ? 'bg-primary' : 'bg-gray-300'}`}
+            className={`w-14 h-8 rounded-full transition-colors relative ${settings.sound ? 'bg-primary' : 'bg-border-strong'}`}
           >
             <span className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform ${settings.sound ? 'left-7' : 'left-1'}`} />
           </button>
         </div>
 
-        <div className="py-3 border-b border-gray-100">
+        <div className="py-3 border-b border-border">
           <span className="font-medium">训练时段</span>
           <div className="flex gap-2 mt-2">
             {([15, 20, 30] as const).map(duration => (
@@ -123,7 +147,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                 key={duration}
                 onClick={() => onUpdate({ trainingDuration: duration })}
                 className={`flex-1 min-h-12 rounded-xl font-semibold transition-colors ${
-                  settings.trainingDuration === duration ? 'bg-primary text-white' : 'bg-gray-100 text-text'
+                  settings.trainingDuration === duration ? 'bg-primary text-white' : 'bg-surface-muted text-text'
                 }`}
               >
                 {duration}分钟
@@ -132,7 +156,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
           </div>
         </div>
 
-        <div className="py-3 border-b border-gray-100">
+        <div className="py-3 border-b border-border">
           <span className="font-medium">数独默认尺寸</span>
           <div className="flex gap-2 mt-2">
             {([4, 6, 8] as const).map(size => (
@@ -140,7 +164,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                 key={size}
                 onClick={() => onUpdate({ defaultSudokuSize: size })}
                 className={`flex-1 min-h-12 rounded-xl font-semibold transition-colors ${
-                  settings.defaultSudokuSize === size ? 'bg-sudoku text-white' : 'bg-gray-100 text-text'
+                  settings.defaultSudokuSize === size ? 'bg-sudoku text-white' : 'bg-surface-muted text-text'
                 }`}
               >
                 {size}x{size}
@@ -149,14 +173,14 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
           </div>
         </div>
 
-        <div className="mt-2 py-3 border-b border-gray-100">
+        <div className="mt-2 py-3 border-b border-border">
           <div className="text-sm font-bold text-poem mb-3">古诗朗读</div>
 
           <div className="flex items-center justify-between py-2">
             <span className="font-medium">启用朗读</span>
             <button
               onClick={() => onUpdate({ poemTtsEnabled: !settings.poemTtsEnabled })}
-              className={`w-14 h-8 rounded-full transition-colors relative ${settings.poemTtsEnabled ? 'bg-poem' : 'bg-gray-300'}`}
+              className={`w-14 h-8 rounded-full transition-colors relative ${settings.poemTtsEnabled ? 'bg-poem' : 'bg-border-strong'}`}
             >
               <span className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform ${settings.poemTtsEnabled ? 'left-7' : 'left-1'}`} />
             </button>
@@ -170,7 +194,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                   <select
                     value={settings.poemTtsVoice}
                     onChange={event => onUpdate({ poemTtsVoice: event.target.value })}
-                    className="w-full mt-1.5 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-text focus:outline-none focus:border-poem"
+                    className="w-full mt-1.5 px-3 py-2.5 rounded-xl border border-border bg-surface text-sm text-text focus:outline-none focus:border-poem"
                   >
                     {voices.map(voice => (
                       <option key={voice.name} value={voice.name}>{voice.displayName}</option>
@@ -187,7 +211,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                       <button
                         type="button"
                         onClick={() => setShowFollowPauseEditor(open => !open)}
-                        className="min-w-10 min-h-10 flex items-center justify-center rounded-full bg-gray-100 text-text active:scale-95 transition-transform"
+                        className="min-w-10 min-h-10 flex items-center justify-center rounded-full bg-surface-muted text-text active:scale-95 transition-transform"
                         aria-label="调整跟读停顿"
                       >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -204,7 +228,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                       </button>
 
                       {showFollowPauseEditor && (
-                        <div className="absolute right-0 top-12 z-10 w-64 rounded-2xl border border-gray-200 bg-white p-4 shadow-xl">
+                        <div className="absolute right-0 top-12 z-10 w-64 rounded-2xl border border-border bg-surface p-4 shadow-xl">
                           <div className="flex items-center justify-between text-sm">
                             <span className="font-medium text-text">跟读停顿</span>
                             <span className="text-text-secondary">{settings.poemTtsFollowPauseSeconds.toFixed(1)}s</span>
@@ -229,7 +253,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                     type="button"
                     onClick={() => onUpdate({ poemTtsMode: 'normal' })}
                     className={`min-h-12 rounded-xl font-semibold transition-colors ${
-                      settings.poemTtsMode === 'normal' ? 'bg-poem text-white' : 'bg-gray-100 text-text'
+                      settings.poemTtsMode === 'normal' ? 'bg-poem text-white' : 'bg-surface-muted text-text'
                     }`}
                   >
                     常规朗读
@@ -238,7 +262,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                     type="button"
                     onClick={() => onUpdate({ poemTtsMode: 'follow' })}
                     className={`min-h-12 rounded-xl font-semibold transition-colors ${
-                      settings.poemTtsMode === 'follow' ? 'bg-poem text-white' : 'bg-gray-100 text-text'
+                      settings.poemTtsMode === 'follow' ? 'bg-poem text-white' : 'bg-surface-muted text-text'
                     }`}
                   >
                     跟读模式
@@ -282,7 +306,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                 <span className="text-sm text-text-secondary">朗读标题</span>
                 <button
                   onClick={() => onUpdate({ poemReadTitle: !settings.poemReadTitle })}
-                  className={`w-12 h-7 rounded-full transition-colors relative ${settings.poemReadTitle ? 'bg-poem' : 'bg-gray-300'}`}
+                  className={`w-12 h-7 rounded-full transition-colors relative ${settings.poemReadTitle ? 'bg-poem' : 'bg-border-strong'}`}
                 >
                   <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${settings.poemReadTitle ? 'left-5.5' : 'left-0.5'}`} />
                 </button>
@@ -292,7 +316,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                 <span className="text-sm text-text-secondary">朗读作者信息</span>
                 <button
                   onClick={() => onUpdate({ poemReadMeta: !settings.poemReadMeta })}
-                  className={`w-12 h-7 rounded-full transition-colors relative ${settings.poemReadMeta ? 'bg-poem' : 'bg-gray-300'}`}
+                  className={`w-12 h-7 rounded-full transition-colors relative ${settings.poemReadMeta ? 'bg-poem' : 'bg-border-strong'}`}
                 >
                   <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${settings.poemReadMeta ? 'left-5.5' : 'left-0.5'}`} />
                 </button>
@@ -307,7 +331,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                 </button>
 
                 {showAdvanced && (
-                  <div className="mt-3 p-3 rounded-xl bg-gray-50">
+                  <div className="mt-3 p-3 rounded-xl bg-surface-muted">
                     <div className="text-xs text-text-secondary mb-2">
                       当前模式：{settings.poemTtsUseCustomService ? '自定义接口' : '默认内置接口'}
                     </div>
@@ -320,7 +344,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                         setCustomUrlError('')
                       }}
                       placeholder="如：http://192.168.1.100:3001/api"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-text focus:outline-none focus:border-poem"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-sm text-text focus:outline-none focus:border-poem"
                     />
                     {customUrlError && (
                       <p className="text-danger text-xs mt-1">{customUrlError}</p>
@@ -336,7 +360,7 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
                       {settings.poemTtsUseCustomService && (
                         <button
                           onClick={handleResetDefault}
-                          className="flex-1 py-2 rounded-lg bg-gray-200 text-text text-sm font-semibold active:scale-95 transition-transform"
+                          className="flex-1 py-2 rounded-lg bg-surface-muted text-text text-sm font-semibold active:scale-95 transition-transform"
                         >
                           恢复默认
                         </button>

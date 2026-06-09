@@ -49,7 +49,7 @@ export default function PasswordDialog({ open, onSuccess, onCancel }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-2xl shadow-xl p-6 mx-6 max-w-sm w-full">
+      <div className="bg-surface rounded-2xl shadow-xl p-6 mx-6 max-w-sm w-full">
         <h2 className="text-lg font-bold text-center mb-3">家长验证</h2>
         <p className="text-text-secondary text-center text-sm mb-4">
           此操作需要家长密码
@@ -61,14 +61,14 @@ export default function PasswordDialog({ open, onSuccess, onCancel }: Props) {
           onKeyDown={e => { if (e.key === 'Enter') handleSubmit() }}
           placeholder="请输入密码"
           autoFocus
-          className={`w-full px-4 py-3 rounded-xl border ${error ? 'border-danger' : 'border-gray-200'} bg-white text-text text-base focus:outline-none focus:border-poem transition-colors mb-2`}
+          className={`w-full px-4 py-3 rounded-xl border ${error ? 'border-danger' : 'border-border'} bg-surface text-text text-base focus:outline-none focus:border-poem transition-colors mb-2`}
         />
         {error && <p className="text-danger text-xs mb-2">{error}</p>}
         <div className="flex gap-3 mt-3">
           <button
             onClick={handleCancel}
             disabled={loading}
-            className="flex-1 min-h-12 rounded-xl bg-gray-100 text-text font-semibold active:scale-95 transition-transform"
+            className="flex-1 min-h-12 rounded-xl bg-surface-muted text-text font-semibold active:scale-95 transition-transform"
           >
             取消
           </button>

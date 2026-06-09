@@ -1,6 +1,9 @@
 export type PoemTtsMode = 'normal' | 'follow'
 
+export type ThemeMode = 'light' | 'dark' | 'system'
+
 export interface Settings {
+  theme: ThemeMode
   sound: boolean
   trainingDuration: 15 | 20 | 30
   defaultSudokuSize: 4 | 6 | 8
@@ -17,6 +20,7 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  theme: 'system',
   sound: true,
   trainingDuration: 20,
   defaultSudokuSize: 4,

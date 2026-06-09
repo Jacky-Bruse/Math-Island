@@ -23,13 +23,13 @@ export default function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-2xl shadow-xl p-6 mx-6 max-w-sm w-full">
+      <div className="bg-surface rounded-2xl shadow-xl p-6 mx-6 max-w-sm w-full">
         <h2 className="text-lg font-bold text-center mb-3">{title}</h2>
         {children && <div className="text-text-secondary text-center mb-5">{children}</div>}
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 min-h-14 rounded-xl bg-gray-100 text-text font-semibold active:scale-95 transition-transform"
+            className="flex-1 min-h-14 rounded-xl bg-surface-muted text-text font-semibold active:scale-95 transition-transform"
           >
             {cancelText}
           </button>
