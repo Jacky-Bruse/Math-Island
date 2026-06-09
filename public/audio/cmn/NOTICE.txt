@@ -1,0 +1,3 @@
+本目录音频来自 hugolpz/audio-cmn（https://github.com/hugolpz/audio-cmn），授权 CC BY-SA。
+发音人：Chen Wang（音节）、Yue Tan（词）；项目方：Hugo Lopez、Nicolas Vion。
+音频原样使用、未经二次剪辑。许可证全文见 LICENSE-CC-BY-SA.txt。

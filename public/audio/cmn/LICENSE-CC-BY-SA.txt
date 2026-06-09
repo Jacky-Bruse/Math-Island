@@ -1,0 +1,3 @@
+Audio files in this directory are licensed under Creative Commons Attribution-ShareAlike (CC BY-SA).
+Source: https://github.com/hugolpz/audio-cmn
+License: https://creativecommons.org/licenses/by-sa/4.0/
