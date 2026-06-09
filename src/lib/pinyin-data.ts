@@ -49,7 +49,7 @@ export const FINALS: Final[] = [
   { id: 'iou', displayFinal: 'iu', canonicalFinal: 'iou', audioRepresentative: 'you1', category: 'compound-final' },
   { id: 'ie', displayFinal: 'ie', canonicalFinal: 'ie', audioRepresentative: 'ye1', category: 'compound-final' },
   { id: 'ue', displayFinal: 'üe', canonicalFinal: 'üe', audioRepresentative: 'yue1', category: 'compound-final' },
-  { id: 'er', displayFinal: 'er', canonicalFinal: 'er', audioRepresentative: 'er2', category: 'compound-final' },
+  { id: 'er', displayFinal: 'er', canonicalFinal: 'er', audioRepresentative: 'er1', category: 'compound-final' },
   // 鼻韵母
   { id: 'an', displayFinal: 'an', canonicalFinal: 'an', audioRepresentative: 'an1', category: 'nasal-final' },
   { id: 'en', displayFinal: 'en', canonicalFinal: 'en', audioRepresentative: 'en1', category: 'nasal-final' },
