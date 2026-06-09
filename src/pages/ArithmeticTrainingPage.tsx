@@ -45,7 +45,7 @@ function ArithmeticContent({ ctx }: { ctx: TrainingShellContext }) {
           <span>{problem.b}</span>
           <span className="mx-2 md:mx-3">=</span>
           <span className="inline-block min-w-[clamp(3.8rem,12vw,7rem)] text-center border-b-[5px] border-primary/30">
-            {input || <span className="text-gray-300">?</span>}
+            {input || <span className="text-text-secondary">?</span>}
           </span>
         </div>
 

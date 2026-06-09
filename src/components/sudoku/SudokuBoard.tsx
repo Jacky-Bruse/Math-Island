@@ -29,7 +29,7 @@ export default function SudokuBoard({ board, givens, size, selectedRow, selected
 
   return (
     <div
-      className="inline-grid border-2 border-gray-800 rounded-lg overflow-hidden"
+      className="inline-grid border-2 border-text rounded-lg overflow-hidden"
       style={{
         width: boardSize,
         height: boardSize,
@@ -51,10 +51,10 @@ export default function SudokuBoard({ board, givens, size, selectedRow, selected
           const isHighlighted = highlightedCell?.row === r && highlightedCell?.col === c
 
           // Border logic for box separators
-          const borderRight = (c + 1) % boxC === 0 && c < size - 1 ? 'border-r-2 border-r-gray-800' : 'border-r border-r-gray-300'
-          const borderBottom = (r + 1) % boxR === 0 && r < size - 1 ? 'border-b-2 border-b-gray-800' : 'border-b border-b-gray-300'
+          const borderRight = (c + 1) % boxC === 0 && c < size - 1 ? 'border-r-2 border-r-text' : 'border-r border-r-border'
+          const borderBottom = (r + 1) % boxR === 0 && r < size - 1 ? 'border-b-2 border-b-text' : 'border-b border-b-border'
 
-          let bg = 'bg-white'
+          let bg = 'bg-surface'
           if (isSelected) bg = 'bg-primary/20'
           else if (isHighlighted) bg = 'bg-secondary-light/50'
           else if (isConflict) bg = 'bg-danger-light/30'
@@ -68,7 +68,7 @@ export default function SudokuBoard({ board, givens, size, selectedRow, selected
             >
               {val !== 0 && (
                 <span className={`text-lg font-bold ${
-                  isGiven ? 'text-gray-800' :
+                  isGiven ? 'text-text' :
                   isConflict ? 'text-danger' :
                   'text-primary'
                 }`} style={{ fontSize: cellTextSize }}>

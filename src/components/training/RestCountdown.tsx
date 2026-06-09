@@ -37,7 +37,7 @@ export default function RestCountdown({ onDone }: Props) {
         </div>
         <button
           onClick={onDone}
-          className="min-w-40 min-h-14 rounded-xl bg-white shadow-sm text-text font-semibold active:scale-95 transition-transform"
+          className="min-w-40 min-h-14 rounded-xl bg-surface shadow-sm text-text font-semibold active:scale-95 transition-transform"
         >
           立即继续
         </button>

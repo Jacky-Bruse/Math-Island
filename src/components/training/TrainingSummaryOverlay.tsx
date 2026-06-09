@@ -21,7 +21,7 @@ export default function TrainingSummaryOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35">
-      <div className="bg-white rounded-3xl shadow-xl p-7 mx-6 max-w-sm w-full text-center">
+      <div className="bg-surface rounded-3xl shadow-xl p-7 mx-6 max-w-sm w-full text-center">
         <div className="text-5xl mb-3">📘</div>
         <h2 className="text-2xl font-bold mb-5">本轮小结</h2>
         <div className="grid grid-cols-2 gap-3 mb-6">

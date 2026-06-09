@@ -48,7 +48,7 @@ export default function ArithmeticSelectPage() {
               className={`w-full min-h-24 rounded-[1.75rem] border shadow-sm px-6 py-5 flex items-center justify-between active:scale-[0.98] transition-transform ${module.className}`}
             >
               <div className="flex items-center gap-4 text-left">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/75 text-3xl shadow-sm">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface/75 text-3xl shadow-sm">
                   {module.icon}
                 </div>
                 <div>

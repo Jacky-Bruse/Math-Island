@@ -15,8 +15,8 @@ export default function SudokuNumberPanel({ size, onNumber, onErase, disabled }:
       : size === 6
         ? 'min-w-[clamp(2.95rem,7vw,3.8rem)] min-h-[clamp(2.95rem,7vw,3.8rem)] text-[clamp(1.05rem,2.2vw,1.45rem)]'
         : 'min-w-[clamp(3.2rem,7.5vw,4.2rem)] min-h-[clamp(3.2rem,7.5vw,4.2rem)] text-[clamp(1.15rem,2.4vw,1.6rem)]'
-  const numberButtonClass = `${numberSizeClass} rounded-2xl bg-white shadow-sm font-bold active:scale-95 transition-transform disabled:opacity-40`
-  const eraseButtonClass = `${numberSizeClass} rounded-2xl bg-gray-100 shadow-sm text-[clamp(0.95rem,1.9vw,1.2rem)] font-semibold active:scale-95 transition-transform disabled:opacity-40`
+  const numberButtonClass = `${numberSizeClass} rounded-2xl bg-surface shadow-sm font-bold active:scale-95 transition-transform disabled:opacity-40`
+  const eraseButtonClass = `${numberSizeClass} rounded-2xl bg-surface-muted shadow-sm text-[clamp(0.95rem,1.9vw,1.2rem)] font-semibold active:scale-95 transition-transform disabled:opacity-40`
 
   return (
     <div className="flex flex-wrap justify-center gap-2.5 md:gap-3 px-2">

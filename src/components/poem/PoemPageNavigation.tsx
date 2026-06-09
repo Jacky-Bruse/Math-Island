@@ -18,8 +18,8 @@ export default function PoemPageNavigation({
   compact = false,
 }: Props) {
   const containerClass = compact
-    ? 'rounded-2xl border border-poem/10 bg-white/85 px-4 py-3 shadow-sm'
-    : 'rounded-3xl border border-poem/15 bg-white px-4 py-4 shadow-md'
+    ? 'rounded-2xl border border-poem/10 bg-surface/85 px-4 py-3 shadow-sm'
+    : 'rounded-3xl border border-poem/15 bg-surface px-4 py-4 shadow-md'
   const metaClass = compact ? 'text-xs' : 'text-sm'
 
   return (
@@ -64,7 +64,7 @@ function NavButton({
       type="button"
       disabled={disabled}
       onClick={() => poem && onClick(poem.id)}
-      className={`min-h-20 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 transition-transform active:scale-[0.98] disabled:opacity-35 disabled:active:scale-100 ${alignment} flex flex-col justify-center`}
+      className={`min-h-20 rounded-2xl border border-border bg-surface-muted px-4 py-3 transition-transform active:scale-[0.98] disabled:opacity-35 disabled:active:scale-100 ${alignment} flex flex-col justify-center`}
     >
       <span className="text-xs font-medium text-text-secondary">{label}</span>
       <span className="mt-1 line-clamp-1 text-sm font-semibold text-text">

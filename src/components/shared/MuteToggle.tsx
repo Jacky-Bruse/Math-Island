@@ -7,7 +7,7 @@ export default function MuteToggle({ isMuted, onToggle }: Props) {
   return (
     <button
       onClick={onToggle}
-      className="min-w-14 min-h-14 flex items-center justify-center rounded-xl bg-white/80 shadow-sm active:scale-95 transition-transform"
+      className="min-w-14 min-h-14 flex items-center justify-center rounded-xl bg-surface/80 shadow-sm active:scale-95 transition-transform"
       aria-label={isMuted ? '取消静音' : '静音'}
     >
       {isMuted ? (

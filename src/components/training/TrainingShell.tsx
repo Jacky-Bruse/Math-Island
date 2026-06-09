@@ -131,7 +131,7 @@ export default function TrainingShell({ module, children }: Props) {
       <div className="flex items-center gap-2 px-3 py-2">
         <BackButton onConfirm={handleBack} needConfirm />
         <div className="flex-1 mx-2">
-          <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
+          <div className="h-2 rounded-full bg-surface-muted overflow-hidden">
             <div
               className="h-full rounded-full bg-primary transition-all duration-1000"
               style={{ width: `${progress * 100}%` }}

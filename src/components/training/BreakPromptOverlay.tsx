@@ -22,7 +22,7 @@ export default function BreakPromptOverlay({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-3xl shadow-xl p-8 mx-6 max-w-sm w-full text-center">
+      <div className="bg-surface rounded-3xl shadow-xl p-8 mx-6 max-w-sm w-full text-center">
         <div className="text-5xl mb-4">{isMidway ? '⏰' : '🎉'}</div>
         <h2 className="text-xl font-bold mb-2">
           {isMidway ? '训练过半啦！' : '训练时间到！'}
@@ -51,7 +51,7 @@ export default function BreakPromptOverlay({
           </button>
           <button
             onClick={onContinue}
-            className="w-full min-h-14 rounded-xl bg-gray-100 text-text font-semibold active:scale-95 transition-transform"
+            className="w-full min-h-14 rounded-xl bg-surface-muted text-text font-semibold active:scale-95 transition-transform"
           >
             {isMidway ? '继续训练' : '继续'}
           </button>

@@ -39,7 +39,7 @@ export default function PoemPlaybackBar({
   const canNext = currentIndex < segmentCount - 1 && (isPlaying || isPaused)
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-lg z-40">
+    <div className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-sm border-t border-border shadow-lg z-40">
       <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-center gap-2">
         {/* 上一句 */}
         <ControlButton
@@ -138,7 +138,7 @@ function ControlButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-11 h-11 rounded-full bg-gray-100 text-text flex items-center justify-center active:scale-95 transition-transform disabled:opacity-30"
+      className="w-11 h-11 rounded-full bg-surface-muted text-text flex items-center justify-center active:scale-95 transition-transform disabled:opacity-30"
       aria-label={label}
     >
       {children}

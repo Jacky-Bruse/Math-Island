@@ -135,7 +135,7 @@ export default function PoemListPage() {
               <button
                 key={poem.id}
                 onClick={() => navigate(`/poems/${poem.id}`)}
-                className="w-full rounded-2xl bg-white border border-poem/10 shadow-sm px-5 py-4 text-left active:scale-[0.98] transition-transform"
+                className="w-full rounded-2xl bg-surface border border-poem/10 shadow-sm px-5 py-4 text-left active:scale-[0.98] transition-transform"
               >
                 <div className="text-lg font-bold text-text mb-1">{poem.title}</div>
                 {(poem.dynasty || poem.author) && (
@@ -155,14 +155,14 @@ export default function PoemListPage() {
         <div className="mt-8 flex gap-3 justify-center">
           <button
             onClick={handleImport}
-            className="px-4 py-2.5 rounded-xl bg-gray-100 text-sm text-text-secondary font-medium active:scale-95 transition-transform"
+            className="px-4 py-2.5 rounded-xl bg-surface-muted text-sm text-text-secondary font-medium active:scale-95 transition-transform"
           >
             导入 Markdown
           </button>
           {poems.length > 0 && (
             <button
               onClick={handleExport}
-              className="px-4 py-2.5 rounded-xl bg-gray-100 text-sm text-text-secondary font-medium active:scale-95 transition-transform"
+              className="px-4 py-2.5 rounded-xl bg-surface-muted text-sm text-text-secondary font-medium active:scale-95 transition-transform"
             >
               导出全部
             </button>

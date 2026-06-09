@@ -115,7 +115,7 @@ export default function PoemReadPage() {
           <div className="flex-1" />
           <button
             onClick={handleEditClick}
-            className="min-w-14 min-h-14 flex items-center justify-center rounded-xl bg-white/80 shadow-sm active:scale-95 transition-transform"
+            className="min-w-14 min-h-14 flex items-center justify-center rounded-xl bg-surface/80 shadow-sm active:scale-95 transition-transform"
             aria-label="编辑"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

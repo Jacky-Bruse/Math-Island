@@ -137,7 +137,7 @@ export default function PoemEditorPage() {
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="如：静夜思"
-              className={`w-full px-4 py-3 rounded-xl border ${errors.title ? 'border-danger' : 'border-gray-200'} bg-white text-text text-base focus:outline-none focus:border-poem transition-colors`}
+              className={`w-full px-4 py-3 rounded-xl border ${errors.title ? 'border-danger' : 'border-border'} bg-surface text-text text-base focus:outline-none focus:border-poem transition-colors`}
             />
             {errors.title && <p className="text-danger text-xs mt-1">{errors.title}</p>}
           </div>
@@ -151,7 +151,7 @@ export default function PoemEditorPage() {
                 value={dynasty}
                 onChange={e => setDynasty(e.target.value)}
                 placeholder="如：唐"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-text text-base focus:outline-none focus:border-poem transition-colors"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text text-base focus:outline-none focus:border-poem transition-colors"
               />
             </div>
             <div className="flex-1">
@@ -161,7 +161,7 @@ export default function PoemEditorPage() {
                 value={author}
                 onChange={e => setAuthor(e.target.value)}
                 placeholder="如：李白"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-text text-base focus:outline-none focus:border-poem transition-colors"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text text-base focus:outline-none focus:border-poem transition-colors"
               />
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function PoemEditorPage() {
               onChange={e => setContent(e.target.value)}
               placeholder={'每行一句，如：\n床前明月光\n疑是地上霜\n举头望明月\n低头思故乡'}
               rows={8}
-              className={`w-full px-4 py-3 rounded-xl border ${errors.content ? 'border-danger' : 'border-gray-200'} bg-white text-text text-base leading-relaxed resize-none focus:outline-none focus:border-poem transition-colors`}
+              className={`w-full px-4 py-3 rounded-xl border ${errors.content ? 'border-danger' : 'border-border'} bg-surface text-text text-base leading-relaxed resize-none focus:outline-none focus:border-poem transition-colors`}
             />
             {errors.content && <p className="text-danger text-xs mt-1">{errors.content}</p>}
           </div>
