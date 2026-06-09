@@ -6,14 +6,18 @@
       // 防首屏闪烁：样式表评估前根据存储的主题给 <html> 挂 .dark。
       // 分支逻辑须与 src/lib/theme.ts 的 applyTheme 完全一致。
       (function () {
+        // theme 解析与回退须与运行时一致：解析失败也回退 'system'（而非浅色），
+        // 否则深色系统设备上会出现首屏浅色、水合后翻深色的闪烁。
+        var theme = 'system'
         try {
           var raw = localStorage.getItem('math-island:settings')
-          var theme = 'system'
           if (raw) { var t = JSON.parse(raw).theme; if (t) theme = t }
+        } catch (e) { theme = 'system' }
+        try {
           var isDark = theme === 'dark' || (theme === 'system' &&
             window.matchMedia('(prefers-color-scheme: dark)').matches)
           if (isDark) document.documentElement.classList.add('dark')
-        } catch (e) { /* 忽略，回退浅色 */ }
+        } catch (e) { /* matchMedia 不可用则回退浅色 */ }
       })()
     </script>
     <link rel="icon" type="image/png" href="/icon-192.png" />
