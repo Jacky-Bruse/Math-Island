@@ -35,25 +35,25 @@ function MultiplicationPracticeContent({ ctx }: { ctx: TrainingShellContext }) {
   return (
     <div className="flex-1 flex flex-col justify-between pt-3">
       <div className="flex-1 flex flex-col items-center justify-center px-3 sm:px-4 md:px-6">
-        <div className="mb-4 rounded-full bg-[#fff3e6] px-4 py-2 text-sm font-bold text-[#c2410c]">
+        <div className="mb-4 rounded-full bg-mult-surface-3 px-4 py-2 text-sm font-bold text-mult-ink-soft">
           练到 {level}
         </div>
 
         <div className={`rounded-[2rem] border px-6 py-8 text-center shadow-sm transition-all ${
           practice.errorCount > 0 && !practice.isAutoAdvancing
-            ? 'animate-shake border-danger-light/70 bg-white'
-            : 'border-[#fed7aa] bg-[linear-gradient(145deg,#fffdfb,#fff3e6)]'
+            ? 'animate-shake border-danger-light/70 bg-mult-surface'
+            : 'border-mult-border-soft bg-[var(--mult-prompt)]'
         }`}
         >
-          <div className="text-xs font-bold uppercase tracking-[0.26em] text-[#fb923c]">Current Prompt</div>
-          <div className="mt-4 text-[clamp(2rem,7vw,4rem)] font-black leading-tight text-[#7c2d12]">
+          <div className="text-xs font-bold uppercase tracking-[0.26em] text-mult-accent-soft">Current Prompt</div>
+          <div className="mt-4 text-[clamp(2rem,7vw,4rem)] font-black leading-tight text-mult-ink-strong">
             {practice.prompt}
           </div>
           <div className="mt-4 text-sm text-text-secondary">
             对应口诀：{practice.fact.chant}
           </div>
           <div className="mt-6 text-[clamp(2.2rem,8vw,4.2rem)] font-black tabular-nums text-primary">
-            {practice.input || <span className="text-gray-300">?</span>}
+            {practice.input || <span className="text-text-secondary">?</span>}
           </div>
         </div>
 

@@ -16,7 +16,7 @@ const modules = [
     title: '乘法口诀',
     desc: '口诀表、跟读、理解、练习',
     path: '/arithmetic/multiplication',
-    className: 'bg-[linear-gradient(135deg,#fff3e6,#ffe2d2)] border-[#f97316]/20',
+    className: 'bg-multiplication-light border-multiplication/20',
     icon: '🍎',
   },
 ] as const
@@ -32,8 +32,8 @@ export default function ArithmeticSelectPage() {
           <h1 className="text-2xl font-bold">算术岛</h1>
         </div>
 
-        <div className="rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(255,248,240,0.88))] px-5 py-5 shadow-[0_20px_45px_rgba(249,115,22,0.08)] mb-5">
-          <div className="text-sm font-semibold uppercase tracking-[0.28em] text-[#ea580c]/70">Math Orchard</div>
+        <div className="rounded-[2rem] border border-mult-border bg-[var(--mult-panel)] px-5 py-5 shadow-[var(--mult-shadow-sm)] mb-5">
+          <div className="text-sm font-semibold uppercase tracking-[0.28em] text-mult-accent/70">Math Orchard</div>
           <h2 className="mt-2 text-3xl font-black leading-tight text-text">今天想练哪一种算术？</h2>
           <p className="mt-2 text-sm leading-6 text-text-secondary">
             加减法继续做题，乘法口诀则可以看整张口诀表、跟读节奏、理解每一句的意思。

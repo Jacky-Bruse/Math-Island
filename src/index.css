@@ -33,6 +33,42 @@
 }
 
 /*
+ * 乘法模块实色令牌。使用 @theme static 强制输出全部变量（不做 tree-shaking），
+ * 既生成 bg-mult-* / text-mult-* / border-mult-* 工具类，又可在任意值 var() 中引用。
+ * 详见 docs/plans/2026-06-08-dark-mode-design.md §3.6。
+ */
+@theme static {
+  --color-mult-ink: #9a3412;
+  --color-mult-ink-strong: #7c2d12;
+  --color-mult-ink-soft: #c2410c;
+  --color-mult-accent: #ea580c;
+  --color-mult-accent-soft: #fb923c;
+  --color-mult-surface: #fffdfb;
+  --color-mult-surface-2: #fff7ed;
+  --color-mult-surface-3: #fff3e6;
+  --color-mult-border: #ffedd5;
+  --color-mult-border-soft: #fed7aa;
+  --color-mult-border-strong: #fdba74;
+}
+
+/*
+ * 乘法模块渐变 / 带色阴影令牌。仅在 bg-[var(--mult-*)] / shadow-[var(--mult-*)]
+ * 等任意值中引用，故定义在普通 :root（深色由下方 .dark 覆盖）。
+ */
+:root {
+  --mult-page: radial-gradient(circle at top, #fff8ef 0%, #fff1e8 32%, #fffdfb 100%);
+  --mult-panel: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 239, 229, 0.92));
+  --mult-card-active: linear-gradient(145deg, #fff1e7, #ffffff);
+  --mult-group-active: linear-gradient(145deg, #fff4eb, #fffdfa);
+  --mult-level: linear-gradient(145deg, #ffffff, #fff7ed);
+  --mult-prompt: linear-gradient(145deg, #fffdfb, #fff3e6);
+  --mult-shadow-lg: 0 28px 60px rgba(249, 115, 22, 0.14);
+  --mult-shadow-md: 0 16px 30px rgba(251, 146, 60, 0.18);
+  --mult-shadow-sm: 0 18px 36px rgba(249, 115, 22, 0.08);
+  --mult-shadow-accent: 0 14px 28px rgba(234, 88, 12, 0.26);
+}
+
+/*
  * 深色主题覆盖（暖棕灰基调）。
  * 必须是 unlayered（非 @layer）规则：CSS 层级优先于特异性，
  * unlayered 才能稳定胜过 @layer theme 里 :root 的浅色默认值。
@@ -53,6 +89,31 @@
   --color-sudoku-light: #1d2e26;
   --color-poem-light: #2b2336;
   --color-multiplication-light: #2e2419;
+
+  /* 乘法模块实色（暖棕底 + 暖浅墨色，强调橙保留） */
+  --color-mult-ink: #fdba74;
+  --color-mult-ink-strong: #fed7aa;
+  --color-mult-ink-soft: #fdba74;
+  --color-mult-accent: #ea580c;
+  --color-mult-accent-soft: #f97316;
+  --color-mult-surface: #26201c;
+  --color-mult-surface-2: #2e2722;
+  --color-mult-surface-3: #352c25;
+  --color-mult-border: #3f342c;
+  --color-mult-border-soft: #4a3d33;
+  --color-mult-border-strong: #6b4f37;
+
+  /* 乘法模块渐变 / 阴影（暖深棕渐变；阴影改深色低光，强调按钮保留橙色辉光） */
+  --mult-page: radial-gradient(circle at top, #241d18 0%, #1f1a16 32%, #1c1917 100%);
+  --mult-panel: linear-gradient(145deg, #2a231e, #241d18);
+  --mult-card-active: linear-gradient(145deg, #3a2a1c, #26201c);
+  --mult-group-active: linear-gradient(145deg, #352616, #2a231e);
+  --mult-level: linear-gradient(145deg, #2a231e, #241d18);
+  --mult-prompt: linear-gradient(145deg, #2a231e, #352c25);
+  --mult-shadow-lg: 0 28px 60px rgba(0, 0, 0, 0.45);
+  --mult-shadow-md: 0 16px 30px rgba(0, 0, 0, 0.4);
+  --mult-shadow-sm: 0 18px 36px rgba(0, 0, 0, 0.3);
+  --mult-shadow-accent: 0 14px 28px rgba(234, 88, 12, 0.35);
 }
 
 @layer base {

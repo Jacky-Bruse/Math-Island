@@ -110,21 +110,21 @@ export default function MultiplicationTablePage() {
   }, [navigate, stop])
 
   return (
-    <PageContainer className="bg-[radial-gradient(circle_at_top,#fff8ef_0%,#fff1e8_32%,#fffdfb_100%)]">
+    <PageContainer className="bg-[var(--mult-page)]">
       <div className="w-full max-w-5xl">
         <div
           data-testid="multiplication-table-locked-shell"
-          className="sticky top-0 z-20 bg-[radial-gradient(circle_at_top,#fff8ef_0%,#fff1e8_32%,#fffdfb_100%)]"
+          className="sticky top-0 z-20 bg-[var(--mult-page)]"
         >
           <div className="flex items-center gap-3 mb-5">
             <BackButton />
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-[#9a3412]">九九乘法口诀</h1>
-              <p className="text-sm text-[#9a3412]/70">点任意算式看苹果演示，按整组读，或从头完整跟读</p>
+              <h1 className="text-2xl md:text-3xl font-black text-mult-ink">九九乘法口诀</h1>
+              <p className="text-sm text-mult-ink/70">点任意算式看苹果演示，按整组读，或从头完整跟读</p>
             </div>
           </div>
 
-          <section className="rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(255,239,229,0.92))] px-5 py-5 shadow-[0_28px_60px_rgba(249,115,22,0.14)]">
+          <section className="rounded-[2rem] border border-mult-border bg-[var(--mult-panel)] px-5 py-5 shadow-[var(--mult-shadow-lg)]">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
                 <p className="max-w-xl text-sm leading-6 text-text-secondary">
@@ -136,14 +136,14 @@ export default function MultiplicationTablePage() {
                 <button
                   type="button"
                   onClick={() => start(allFacts, 'full-read', '完整朗读')}
-                  className="min-h-14 rounded-2xl bg-[#ea580c] px-5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(234,88,12,0.26)] active:scale-[0.98] transition-transform"
+                  className="min-h-14 rounded-2xl bg-mult-accent px-5 text-sm font-bold text-white shadow-[var(--mult-shadow-accent)] active:scale-[0.98] transition-transform"
                 >
                   完整朗读
                 </button>
                 <button
                   type="button"
                   onClick={() => start(allFacts, 'full-follow', '完整跟读')}
-                  className="min-h-14 rounded-2xl bg-[#fb923c] px-5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(251,146,60,0.28)] active:scale-[0.98] transition-transform"
+                  className="min-h-14 rounded-2xl bg-mult-accent-soft px-5 text-sm font-bold text-white shadow-[var(--mult-shadow-accent)] active:scale-[0.98] transition-transform"
                 >
                   完整跟读
                 </button>
@@ -153,18 +153,18 @@ export default function MultiplicationTablePage() {
                     stop()
                     navigate('/arithmetic/multiplication/practice')
                   }}
-                  className="min-h-14 rounded-2xl border border-[#fdba74] bg-white px-5 text-sm font-bold text-[#c2410c] active:scale-[0.98] transition-transform"
+                  className="min-h-14 rounded-2xl border border-mult-border-strong bg-mult-surface px-5 text-sm font-bold text-mult-ink-soft active:scale-[0.98] transition-transform"
                 >
                   口诀练习
                 </button>
               </div>
             </div>
 
-            <div className="mt-5 rounded-[1.5rem] border border-[#fed7aa] bg-white/80 px-4 py-4 shadow-sm">
+            <div className="mt-5 rounded-[1.5rem] border border-mult-border-soft bg-mult-surface/80 px-4 py-4 shadow-sm">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#c2410c]/70">Now Playing</div>
-                  <div className="mt-1 text-xl font-black text-[#9a3412]">
+                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-mult-ink-soft/70">Now Playing</div>
+                  <div className="mt-1 text-xl font-black text-mult-ink">
                     {currentFact ? formatMultiplicationEquation(currentFact) : '选择整张表朗读、跟读，或点某一组朗读'}
                   </div>
                   <div className="mt-1 text-sm text-text-secondary">
@@ -177,7 +177,7 @@ export default function MultiplicationTablePage() {
                     <button
                       type="button"
                       onClick={pause}
-                      className="min-h-11 rounded-xl bg-[#fff7ed] px-4 text-sm font-semibold text-[#c2410c] active:scale-95 transition-transform"
+                      className="min-h-11 rounded-xl bg-mult-surface-2 px-4 text-sm font-semibold text-mult-ink-soft active:scale-95 transition-transform"
                     >
                       暂停
                     </button>
@@ -185,7 +185,7 @@ export default function MultiplicationTablePage() {
                     <button
                       type="button"
                       onClick={resume}
-                      className="min-h-11 rounded-xl bg-[#ea580c] px-4 text-sm font-semibold text-white active:scale-95 transition-transform"
+                      className="min-h-11 rounded-xl bg-mult-accent px-4 text-sm font-semibold text-white active:scale-95 transition-transform"
                     >
                       继续
                     </button>
@@ -195,7 +195,7 @@ export default function MultiplicationTablePage() {
                     type="button"
                     onClick={replay}
                     disabled={!queue}
-                    className="min-h-11 rounded-xl bg-[#fff7ed] px-4 text-sm font-semibold text-[#c2410c] active:scale-95 transition-transform disabled:opacity-40"
+                    className="min-h-11 rounded-xl bg-mult-surface-2 px-4 text-sm font-semibold text-mult-ink-soft active:scale-95 transition-transform disabled:opacity-40"
                   >
                     重读当前
                   </button>
@@ -203,7 +203,7 @@ export default function MultiplicationTablePage() {
                     type="button"
                     onClick={stop}
                     disabled={state === 'idle'}
-                    className="min-h-11 rounded-xl bg-[#fef2f2] px-4 text-sm font-semibold text-danger active:scale-95 transition-transform disabled:opacity-40"
+                    className="min-h-11 rounded-xl bg-danger-light/20 px-4 text-sm font-semibold text-danger active:scale-95 transition-transform disabled:opacity-40"
                   >
                     停止
                   </button>
@@ -252,17 +252,17 @@ const GroupRow = memo(function GroupRow({
   const facts = getMultiplicationFactsByGroup(group)
 
   return (
-    <div className="rounded-[1.75rem] border border-white/70 bg-white/78 px-4 py-4 shadow-[0_18px_36px_rgba(249,115,22,0.08)] backdrop-blur-sm">
+    <div className="rounded-[1.75rem] border border-mult-border bg-mult-surface/78 px-4 py-4 shadow-[var(--mult-shadow-sm)] backdrop-blur-sm">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="text-xs font-bold uppercase tracking-[0.26em] text-[#fb923c]">Group {group}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.26em] text-mult-accent-soft">Group {group}</div>
           <h3 className="mt-1 text-xl font-black text-text">{group} 这一组</h3>
           <p className="text-sm text-text-secondary">顺序从 1×{group} 读到 {group}×{group}</p>
         </div>
         <button
           type="button"
           onClick={() => onPlayGroup(group)}
-          className="min-h-12 rounded-2xl bg-[#fff3e6] px-4 text-sm font-bold text-[#c2410c] active:scale-[0.98] transition-transform"
+          className="min-h-12 rounded-2xl bg-mult-surface-3 px-4 text-sm font-bold text-mult-ink-soft active:scale-[0.98] transition-transform"
         >
           朗读这一组
         </button>
@@ -283,14 +283,14 @@ const GroupRow = memo(function GroupRow({
               onClick={() => onOpenUnderstand(fact)}
               className={`group rounded-[1.5rem] border px-4 py-4 text-left transition-all duration-300 active:scale-[0.98] ${
                 active
-                  ? 'border-[#fb923c] bg-[linear-gradient(145deg,#fff1e7,#ffffff)] shadow-[0_16px_30px_rgba(251,146,60,0.18)]'
-                  : 'border-[#ffedd5] bg-[#fffdfb] hover:border-[#fdba74]'
+                  ? 'border-mult-accent-soft bg-[var(--mult-card-active)] shadow-[var(--mult-shadow-md)]'
+                  : 'border-mult-border bg-mult-surface hover:border-mult-border-strong'
               }`}
             >
-              <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#c2410c]/60">
+              <div className="text-xs font-bold uppercase tracking-[0.22em] text-mult-ink-soft/60">
                 Group {group}
               </div>
-              <div className="mt-2 text-[clamp(1.9rem,4vw,2.7rem)] font-black tracking-tight text-[#7c2d12]">
+              <div className="mt-2 text-[clamp(1.9rem,4vw,2.7rem)] font-black tracking-tight text-mult-ink-strong">
                 {formatMultiplicationEquation(fact)}
               </div>
               <div className="mt-2 text-sm text-text-secondary">

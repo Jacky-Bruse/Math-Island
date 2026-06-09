@@ -75,12 +75,12 @@ export default function MultiplicationUnderstandPage() {
   if (!fact || !navigation) {
     return (
       <PageContainer className="justify-center">
-        <div className="rounded-3xl bg-white px-6 py-8 text-center shadow-md">
+        <div className="rounded-3xl bg-mult-surface px-6 py-8 text-center shadow-md">
           <p className="text-text-secondary">没有找到这句口诀。</p>
           <button
             type="button"
             onClick={() => navigate('/arithmetic/multiplication')}
-            className="mt-4 min-h-12 rounded-xl bg-[#ea580c] px-5 font-semibold text-white"
+            className="mt-4 min-h-12 rounded-xl bg-mult-accent px-5 font-semibold text-white"
           >
             回到口诀表
           </button>
@@ -126,13 +126,13 @@ export default function MultiplicationUnderstandPage() {
   }
 
   return (
-    <PageContainer className="bg-[radial-gradient(circle_at_top,#fffaf0_0%,#fff6ec_34%,#fffdfb_100%)]">
+    <PageContainer className="bg-[var(--mult-page)]">
       <div className="w-full max-w-5xl">
         <div className="mb-5 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={goBack}
-            className="min-w-14 min-h-14 rounded-2xl bg-white/85 shadow-sm active:scale-95 transition-transform"
+            className="min-w-14 min-h-14 rounded-2xl bg-mult-surface/85 shadow-sm active:scale-95 transition-transform"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
@@ -140,8 +140,8 @@ export default function MultiplicationUnderstandPage() {
           </button>
 
           <div className="flex-1 text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.28em] text-[#c2410c]/70">Understand</div>
-            <h1 className="mt-1 text-3xl font-black text-[#7c2d12]">{fact.a} × {fact.b}</h1>
+            <div className="text-xs font-bold uppercase tracking-[0.28em] text-mult-ink-soft/70">Understand</div>
+            <h1 className="mt-1 text-3xl font-black text-mult-ink-strong">{fact.a} × {fact.b}</h1>
             <p className="mt-1 text-sm text-text-secondary">{fact.meaningText}，一共 {fact.answer} 个</p>
           </div>
 
@@ -150,7 +150,7 @@ export default function MultiplicationUnderstandPage() {
               type="button"
               onClick={() => openNeighbor('previous')}
               disabled={!navigation.previous}
-              className="min-w-12 min-h-12 rounded-2xl bg-white/85 shadow-sm active:scale-95 transition-transform disabled:opacity-35"
+              className="min-w-12 min-h-12 rounded-2xl bg-mult-surface/85 shadow-sm active:scale-95 transition-transform disabled:opacity-35"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
@@ -160,7 +160,7 @@ export default function MultiplicationUnderstandPage() {
               type="button"
               onClick={() => openNeighbor('next')}
               disabled={!navigation.next}
-              className="min-w-12 min-h-12 rounded-2xl bg-white/85 shadow-sm active:scale-95 transition-transform disabled:opacity-35"
+              className="min-w-12 min-h-12 rounded-2xl bg-mult-surface/85 shadow-sm active:scale-95 transition-transform disabled:opacity-35"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
@@ -169,10 +169,10 @@ export default function MultiplicationUnderstandPage() {
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-white/80 bg-[linear-gradient(160deg,rgba(255,255,255,0.95),rgba(255,243,230,0.92))] px-5 py-5 shadow-[0_28px_60px_rgba(249,115,22,0.16)]">
+        <div className="rounded-[2rem] border border-mult-border bg-[var(--mult-panel)] px-5 py-5 shadow-[var(--mult-shadow-lg)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="text-xs font-bold uppercase tracking-[0.28em] text-[#fb923c]">Apple Demo</div>
+              <div className="text-xs font-bold uppercase tracking-[0.28em] text-mult-accent-soft">Apple Demo</div>
               <h2 className="mt-2 text-2xl font-black text-text">把这句口诀变成能看见的苹果分组</h2>
               <p className="mt-2 text-sm leading-6 text-text-secondary">
                 先看几组、每组几个，再看一共多少个，最后把它收束回口诀本身。
@@ -183,7 +183,7 @@ export default function MultiplicationUnderstandPage() {
               <button
                 type="button"
                 onClick={() => setRunId(value => value + 1)}
-                className="min-h-12 rounded-2xl bg-[#ea580c] px-4 text-sm font-bold text-white active:scale-95 transition-transform"
+                className="min-h-12 rounded-2xl bg-mult-accent px-4 text-sm font-bold text-white active:scale-95 transition-transform"
               >
                 再看一遍
               </button>
@@ -191,7 +191,7 @@ export default function MultiplicationUnderstandPage() {
                 <button
                   type="button"
                   onClick={() => setExpandedNumbers(value => !value)}
-                  className="min-h-12 rounded-2xl border border-[#fdba74] bg-white px-4 text-sm font-bold text-[#c2410c] active:scale-95 transition-transform"
+                  className="min-h-12 rounded-2xl border border-mult-border-strong bg-mult-surface px-4 text-sm font-bold text-mult-ink-soft active:scale-95 transition-transform"
                 >
                   {expandedNumbers ? '收起全部编号' : '展开全部编号'}
                 </button>
@@ -199,7 +199,7 @@ export default function MultiplicationUnderstandPage() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-[1.75rem] border border-[#ffedd5] bg-white/75 px-4 py-5">
+          <div className="mt-6 rounded-[1.75rem] border border-mult-border bg-mult-surface/75 px-4 py-5">
             <div className="multiplication-group-board">
               {Array.from({ length: fact.groups }, (_, groupIndex) => {
                 const groupNumber = groupIndex + 1
@@ -211,14 +211,14 @@ export default function MultiplicationUnderstandPage() {
                     key={groupNumber}
                     className={`rounded-[1.5rem] border px-3 py-3 transition-all duration-500 ${
                       isHighlighted
-                        ? 'border-[#fdba74] bg-[linear-gradient(145deg,#fff4eb,#fffdfa)] shadow-[0_12px_28px_rgba(251,146,60,0.16)]'
-                        : 'border-[#ffedd5] bg-[#fffaf5]'
+                        ? 'border-mult-border-strong bg-[var(--mult-group-active)] shadow-[var(--mult-shadow-md)]'
+                        : 'border-mult-border bg-mult-surface'
                     }`}
                   >
                     <div className="mb-3 flex items-center justify-between">
-                      <div className="text-sm font-bold text-[#9a3412]">第 {groupNumber} 组</div>
+                      <div className="text-sm font-bold text-mult-ink">第 {groupNumber} 组</div>
                       {(effectiveMode === 'grouped' || highlightedGroups >= groupNumber) && stage >= 2 && (
-                        <div className={`rounded-full px-3 py-1 text-xs font-bold ${isHighlighted ? 'bg-[#ea580c] text-white' : 'bg-[#ffedd5] text-[#c2410c]'}`}>
+                        <div className={`rounded-full px-3 py-1 text-xs font-bold ${isHighlighted ? 'bg-mult-accent text-white' : 'bg-mult-border text-mult-ink-soft'}`}>
                           {isHighlighted ? cumulativeTotal : `${fact.itemsPerGroup}`}
                         </div>
                       )}
@@ -265,12 +265,12 @@ function StepCard({ active, title, value }: { active: boolean; title: string; va
   return (
     <div className={`rounded-[1.5rem] border px-4 py-4 transition-all duration-500 ${
       active
-        ? 'border-[#fdba74] bg-white shadow-[0_12px_24px_rgba(251,146,60,0.14)]'
-        : 'border-[#ffedd5] bg-[#fff8f2] opacity-70'
+        ? 'border-mult-border-strong bg-mult-surface shadow-[var(--mult-shadow-md)]'
+        : 'border-mult-border bg-mult-surface-2 opacity-70'
     }`}
     >
-      <div className="text-xs font-bold uppercase tracking-[0.24em] text-[#c2410c]/65">{title}</div>
-      <div className="mt-2 text-xl font-black text-[#7c2d12]">{value}</div>
+      <div className="text-xs font-bold uppercase tracking-[0.24em] text-mult-ink-soft/65">{title}</div>
+      <div className="mt-2 text-xl font-black text-mult-ink-strong">{value}</div>
     </div>
   )
 }
