@@ -1,0 +1,2 @@
+本目录音频来自 davinfifield/mp3-chinese-pinyin-sound（https://github.com/davinfifield/mp3-chinese-pinyin-sound），授权 The Unlicense（公有领域）。
+用于替换少数 hugolpz 录音听感不佳的音节（如 ch/chi）。

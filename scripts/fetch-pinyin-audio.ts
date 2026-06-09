@@ -15,6 +15,7 @@ import {
 } from '../src/lib/pinyin-data'
 import { blendBase, toAudioKey } from '../src/lib/pinyin-orthography'
 import { VALID_BLEND_SYLLABLES } from '../src/lib/pinyin-syllables.generated'
+import { DAV_OVERRIDE_KEYS, DAV_RAW, DAV_REPO } from '../src/lib/pinyin-audio-overrides'
 import type { Tone } from '../src/types/pinyin'
 
 // 规范化为可比较字符串（按 base 排序），用于检测 generated 表漂移
@@ -149,6 +150,9 @@ async function main() {
     for (const h of exampleNeeded) {
       if (!existsSync(path.join(OUT, 'hsk', `cmn-${h}.mp3`))) localProblems.push(`本地缺例字 cmn-${h}.mp3`)
     }
+    for (const k of DAV_OVERRIDE_KEYS) {
+      if (!existsSync(path.join(OUT, 'dav', `${k}.mp3`))) localProblems.push(`本地缺覆盖音源 dav/${k}.mp3`)
+    }
 
     if (localProblems.length) {
       console.error(`\n⚠ 本地一致性问题（${localProblems.length}）：`)
@@ -190,6 +194,17 @@ ${mapLines}
     url: `${RAW}/64k/hsk/cmn-${encodeURIComponent(h)}.mp3`,
     out: path.join(OUT, 'hsk', `cmn-${h}.mp3`),
   })))
+
+  // davinfifield 覆盖音源（The Unlicense，公有领域）：少数 hugolpz 录音听感不佳的音节
+  await mkdir(path.join(OUT, 'dav'), { recursive: true })
+  console.log(`下载 davinfifield 覆盖音源（${DAV_OVERRIDE_KEYS.length}）…`)
+  await downloadAll(DAV_OVERRIDE_KEYS.map(k => ({
+    url: `${DAV_RAW}/${k}.mp3`,
+    out: path.join(OUT, 'dav', `${k}.mp3`),
+  })))
+  await writeFile(path.join(OUT, 'dav', 'NOTICE.txt'),
+    `本目录音频来自 ${DAV_REPO}（https://github.com/${DAV_REPO}），授权 The Unlicense（公有领域）。\n` +
+    `用于替换少数 hugolpz 录音听感不佳的音节（如 ch/chi）。\n`, 'utf8')
 
   // LICENSE / NOTICE（CC-by-sa 署名义务）
   await writeFile(path.join(OUT, 'NOTICE.txt'),
