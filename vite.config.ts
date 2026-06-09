@@ -21,6 +21,16 @@ export default defineConfig({
               expiration: { maxEntries: 10, maxAgeSeconds: 365 * 24 * 60 * 60 },
             },
           },
+          {
+            // 拼音真人录音：同源静态 mp3，首次播放后离线可用；不缓存 404
+            urlPattern: /\/audio\/cmn\/.*\.mp3$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pinyin-audio',
+              expiration: { maxEntries: 1500, maxAgeSeconds: 180 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
         ],
       },
       manifest: {

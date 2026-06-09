@@ -45,6 +45,15 @@ const modules = [
     border: 'border-poem/20',
     icon: '📚',
   },
+  {
+    key: 'pinyin',
+    title: '拼音岛',
+    desc: '认字母 · 拼读 · 识字',
+    path: '/pinyin',
+    color: 'bg-pinyin-light',
+    border: 'border-pinyin/20',
+    icon: '🗣️',
+  },
 ] as const
 
 export default function HomePage() {

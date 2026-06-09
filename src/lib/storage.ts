@@ -1,5 +1,7 @@
 import type { Settings } from '../types/settings'
 import { DEFAULT_SETTINGS } from '../types/settings'
+import type { PinyinProgress } from '../types/pinyin'
+import { PINYIN_PROGRESS_VERSION } from '../types/pinyin'
 
 const PREFIX = 'math-island:'
 
@@ -8,6 +10,7 @@ const KEYS = {
   lastModule: `${PREFIX}lastModule`,
   lastArithRange: `${PREFIX}lastArithRange`,
   lastSudokuSize: `${PREFIX}lastSudokuSize`,
+  pinyinProgress: `${PREFIX}pinyin-progress`,
 } as const
 
 export function loadSettings(): Settings {
@@ -49,6 +52,32 @@ export function loadLastSudokuSize(): number | null {
 
 export function saveLastSudokuSize(size: number): void {
   localStorage.setItem(KEYS.lastSudokuSize, String(size))
+}
+
+function freshPinyinProgress(): PinyinProgress {
+  return { version: PINYIN_PROGRESS_VERSION, learned: {}, characterCorrect: {} }
+}
+
+export function loadPinyinProgress(): PinyinProgress {
+  try {
+    const raw = localStorage.getItem(KEYS.pinyinProgress)
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<PinyinProgress>
+      if (parsed.version === PINYIN_PROGRESS_VERSION) {
+        return {
+          version: PINYIN_PROGRESS_VERSION,
+          learned: parsed.learned ?? {},
+          characterCorrect: parsed.characterCorrect ?? {},
+        }
+      }
+      // 版本不符：丢弃旧结构，重置（迁移点）
+    }
+  } catch { /* ignore */ }
+  return freshPinyinProgress()
+}
+
+export function savePinyinProgress(progress: PinyinProgress): void {
+  localStorage.setItem(KEYS.pinyinProgress, JSON.stringify(progress))
 }
 
 export function clearAllData(): void {

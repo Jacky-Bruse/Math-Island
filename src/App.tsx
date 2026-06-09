@@ -13,6 +13,10 @@ import SudokuTrainingPage from './pages/SudokuTrainingPage'
 import PoemListPage from './pages/PoemListPage'
 import PoemReadPage from './pages/PoemReadPage'
 import PoemEditorPage from './pages/PoemEditorPage'
+import PinyinHomePage from './pages/PinyinHomePage'
+import PinyinLettersPage from './pages/PinyinLettersPage'
+import PinyinBlendPage from './pages/PinyinBlendPage'
+import PinyinCharactersPage from './pages/PinyinCharactersPage'
 
 export default function App() {
   return (
@@ -33,6 +37,10 @@ export default function App() {
       <Route path="/poems/edit" element={<PoemEditorPage />} />
       <Route path="/poems/edit/:id" element={<PoemEditorPage />} />
       <Route path="/poems/:id" element={<PoemReadPage />} />
+      <Route path="/pinyin" element={<PinyinHomePage />} />
+      <Route path="/pinyin/letters" element={<PinyinLettersPage />} />
+      <Route path="/pinyin/blend" element={<PinyinBlendPage />} />
+      <Route path="/pinyin/characters" element={<PinyinCharactersPage />} />
     </Routes>
   )
 }

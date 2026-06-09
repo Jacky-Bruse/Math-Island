@@ -27,6 +27,8 @@
   --color-poem-light: #ede9fe;
   --color-multiplication: #ea580c;
   --color-multiplication-light: #fff3e6;
+  --color-pinyin: #14b8a6;
+  --color-pinyin-light: #ccfbf1;
   --font-family-base: 'Nunito', system-ui, -apple-system, sans-serif;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
@@ -89,6 +91,7 @@
   --color-sudoku-light: #1d2e26;
   --color-poem-light: #2b2336;
   --color-multiplication-light: #2e2419;
+  --color-pinyin-light: #15302b;
 
   /* 乘法模块实色（暖棕底 + 暖浅墨色，强调橙保留） */
   --color-mult-ink: #fdba74;
