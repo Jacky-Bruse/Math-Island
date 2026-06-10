@@ -52,10 +52,14 @@ check('toSyllable(g,uei,1)', () => {
 })
 check('toSyllable(b,e,1) 非法→null', () => assert.equal(toSyllable('b', 'e', 1), null))
 
-console.log('整体认读不可拼读 / 声调可用性')
-check('zh + i 不可拼读（整体认读 zhi）', () => assert.equal(isValidBlend('zh', 'i'), false))
-check('z + i 不可拼读（整体认读 zi）', () => assert.equal(isValidBlend('z', 'i'), false))
-check('r + i 不可拼读（整体认读 ri）', () => assert.equal(isValidBlend('r', 'i'), false))
+console.log('整体认读 -i 可拼读（四声练习） / 声调可用性')
+check('zh + i 可拼读（zhi）', () => assert.equal(isValidBlend('zh', 'i'), true))
+check('z + i 可拼读（zi）', () => assert.equal(isValidBlend('z', 'i'), true))
+check('r + i 可拼读（ri）', () => assert.equal(isValidBlend('r', 'i'), true))
+check('zh + i 四声齐全', () => assert.deepEqual(availableTones('zh', 'i'), [1, 2, 3, 4]))
+check('toSyllable(sh,i,1) → shī', () => {
+  assert.deepEqual(toSyllable('sh', 'i', 1), { display: 'shī', audioKey: 'shi1', base: 'shi', tone: 1 })
+})
 check('ma 四声齐全', () => assert.deepEqual(availableTones('m', 'a'), [1, 2, 3, 4]))
 const juTones = availableTones('j', 'v') // j + ü
 check('availableTones(j,ü) 非空', () => assert.ok(juTones.length > 0))

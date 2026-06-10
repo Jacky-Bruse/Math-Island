@@ -7,10 +7,10 @@ import { VALID_BLEND_SYLLABLES } from './pinyin-syllables.generated'
 import type { SyllableResult, Tone } from '../types/pinyin'
 
 // 剔除不适合一年级拼读的 base：
-// - 整体认读音节（zhi/chi/shi/ri/zi/ci/si）：应作整体认读，不在拼读器里用“声母+i”拼出；
 // - audio-cmn 收录的方言/语气/罕见音节（fe/lo/cei/tei/kei/nun…），普通话拼读教学不出现。
+// 注：整体认读音节（zhi/chi/shi/ri/zi/ci/si）虽按统编版整体认读，但四声均需练习，
+//     故保留在拼读器中可作普通音节拼读（四声音频齐全）。
 const DENYLIST = new Set<string>([
-  'zhi', 'chi', 'shi', 'ri', 'zi', 'ci', 'si',
   'fe', 'lo', 'cei', 'tei', 'kei', 'nun', 'nou',
 ])
 
