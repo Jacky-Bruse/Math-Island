@@ -34,9 +34,9 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: '数力岛',
-        short_name: '数力岛',
-        description: '儿童数学与逻辑训练应用',
+        name: '启明星',
+        short_name: '启明星',
+        description: '儿童数学 · 语文 · 逻辑启蒙训练应用',
         theme_color: '#6366f1',
         background_color: '#f0f4ff',
         display: 'standalone',

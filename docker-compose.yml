@@ -1,7 +1,7 @@
 services:
   web:
-    container_name: math-island
-    image: ${MATH_ISLAND_IMAGE:-your-dockerhub-username/math-island:latest}
+    container_name: morning-star
+    image: ${MORNING_STAR_IMAGE:-your-dockerhub-username/morning-star:latest}
     ports:
       - "80:80"
     volumes:

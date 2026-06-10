@@ -33,7 +33,7 @@ const CHECK_ONLY = process.argv.includes('--check')
 
 async function fetchTree(): Promise<{ syllabs: Set<string>; hsk: Set<string> }> {
   const res = await fetch(`https://api.github.com/repos/${REPO}/git/trees/master?recursive=1`, {
-    headers: { 'User-Agent': 'math-island', Accept: 'application/vnd.github+json' },
+    headers: { 'User-Agent': 'morning-star', Accept: 'application/vnd.github+json' },
   })
   if (!res.ok) throw new Error(`拉取仓库 tree 失败：HTTP ${res.status}`)
   const data = (await res.json()) as { tree?: Array<{ path?: string }> }
@@ -60,7 +60,7 @@ async function downloadAll(items: DownloadItem[], concurrency = 16): Promise<voi
     while (i < items.length) {
       const item = items[i++]
       if (existsSync(item.out)) { skipped++; continue }
-      const res = await fetch(item.url, { headers: { 'User-Agent': 'math-island' } })
+      const res = await fetch(item.url, { headers: { 'User-Agent': 'morning-star' } })
       if (!res.ok) { console.error(`  ✗ 下载失败 ${res.status}: ${item.url}`); continue }
       const buf = Buffer.from(await res.arrayBuffer())
       await writeFile(item.out, buf)

@@ -27,7 +27,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/math-island:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/math-island:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/morning-star:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/morning-star:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -1,4 +1,4 @@
-# Math-Island（数力岛）
+# 启明星（Morning Star）
 
 面向平板端儿童的数学、语文与逻辑训练 PWA，当前包含五大模块：
 
@@ -153,7 +153,7 @@ npm run test:pinyin   # 拼音数据自检
 项目当前推荐使用预编译的单镜像部署，镜像内同时包含前端静态资源、Nginx 和 `tts-service`：
 
 ```bash
-MATH_ISLAND_IMAGE=你的DockerHub用户名/math-island:latest ADMIN_PASSWORD=你的密码 docker compose up -d
+MORNING_STAR_IMAGE=你的DockerHub用户名/morning-star:latest ADMIN_PASSWORD=你的密码 docker compose up -d
 ```
 
 启动后：
@@ -166,8 +166,8 @@ MATH_ISLAND_IMAGE=你的DockerHub用户名/math-island:latest ADMIN_PASSWORD=你
 如果需要本地构建同款单镜像：
 
 ```bash
-docker build -t math-island:local .
-MATH_ISLAND_IMAGE=math-island:local ADMIN_PASSWORD=你的密码 docker compose up -d
+docker build -t morning-star:local .
+MORNING_STAR_IMAGE=morning-star:local ADMIN_PASSWORD=你的密码 docker compose up -d
 ```
 
 如果不设置 `ADMIN_PASSWORD`，古诗写操作会返回 `403`，阅读功能仍可用。

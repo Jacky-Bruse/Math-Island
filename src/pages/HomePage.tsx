@@ -86,7 +86,7 @@ export default function HomePage() {
     <PageContainer className="justify-center">
       <div className="w-full max-w-md">
         <div className="text-center mb-8" {...longPressProps}>
-          <h1 className="text-4xl font-extrabold text-primary mb-1">数力岛</h1>
+          <h1 className="text-4xl font-extrabold text-primary mb-1">启明星</h1>
           <p className="text-text-secondary text-sm">长按此处打开设置</p>
         </div>
 
