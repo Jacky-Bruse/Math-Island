@@ -7,7 +7,7 @@ import { LETTER_SEQUENCE, letterEntryId } from '../lib/pinyin-data'
 const stages = [
   { key: 'letters', title: '认字母', desc: '声母 · 韵母 · 四声，点读跟读', path: '/pinyin/letters', icon: '🔤' },
   { key: 'blend', title: '拼读', desc: '声母 + 韵母 + 声调，拼出音节', path: '/pinyin/blend', icon: '🧩' },
-  { key: 'characters', title: '汉字联系', desc: '听音认字、看拼音认字', path: '/pinyin/characters', icon: '📖' },
+  { key: 'characters', title: '汉字练习', desc: '听音认字、看拼音认字', path: '/pinyin/characters', icon: '📖' },
 ] as const
 
 export default function PinyinHomePage() {

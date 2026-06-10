@@ -150,7 +150,7 @@ export function letterEntryId(entry: LetterEntry): string {
 export const BLEND_INITIALS: Initial[] = INITIALS.filter(i => i.canBlend)
 export const BLEND_FINALS: Final[] = FINALS.filter(f => f.id !== 'er')
 
-// ── 例字白名单（“汉字联系”阶段；均为单字、避开多音字，音频取 cmn-{hanzi}.mp3）──
+// ── 例字白名单（“汉字练习”阶段；均为单字、避开多音字，音频取 cmn-{hanzi}.mp3）──
 // 注：每个汉字的 cmn-{hanzi}.mp3 存在性由 fetch-pinyin-audio 脚本校验。
 export const EXAMPLE_WORDS: ExampleWord[] = [
   { hanzi: '八', pinyin: 'bā' },

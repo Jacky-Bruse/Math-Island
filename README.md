@@ -1,11 +1,12 @@
 # Math-Island（数力岛）
 
-面向平板端儿童的数学与逻辑训练 PWA，当前包含四大模块：
+面向平板端儿童的数学、语文与逻辑训练 PWA，当前包含五大模块：
 
-- 加减法训练（10 / 20 / 100 以内）
+- 算术岛（加减法 10 / 20 / 100 以内；乘法口诀：乘法表 / 理解 / 练习）
 - 比大小训练（两位数 10-99，使用 `>` / `<`）
 - 数独训练（4x4 / 6x6 / 8x8）
 - 古诗阅读（列表 / 阅读 / 页内切换 / 编辑 / 导入导出 / 朗读 / 跟读）
+- 拼音岛（认字母：声母 / 韵母 / 四声点读跟读；拼读：拼出音节；汉字：听音认字 / 看拼音认字）
 
 技术栈：
 
@@ -16,7 +17,7 @@
 
 ## 功能概览
 
-- 首页四入口，长按标题区域打开设置
+- 首页五入口，长按标题区域打开设置
 - 训练计时支持 `15 / 20 / 30` 分钟，并带到点休息提醒
 - 训练页支持静音快捷按钮
 - 数独支持草稿保存与恢复（IndexedDB）
@@ -27,6 +28,9 @@
 - 跟读模式支持按句长自适应停顿，并可在设置中通过小型调节图标临时展开滑杆微调
 - 古诗写操作受家长密码保护
 - 古诗数据由 `tts-service` 持久化保存
+- 算术岛包含加减法与乘法口诀（乘法表 / 理解 / 练习）两类训练
+- 拼音岛支持声母 / 韵母 / 四声点读跟读，并提供拼读与汉字认读练习
+- 拼音音频可通过脚本批量拉取与校验
 - 内置离线资源，支持 PWA 安装和离线访问
 
 ## 快速开始
@@ -134,6 +138,16 @@ npx tsx scripts/generate-sudoku.ts
 - `public/puzzles/sudoku-6x6.json`
 - `public/puzzles/sudoku-8x8.json`
 
+## 拼音音频与自检
+
+拼音模块的发音音频可通过脚本批量拉取与校验（已在 `package scripts` 中注册）：
+
+```bash
+npm run fetch-audio   # 拉取拼音音频
+npm run check-audio   # 校验音频完整性（fetch-pinyin-audio.ts --check）
+npm run test:pinyin   # 拼音数据自检
+```
+
 ## Docker Compose 部署
 
 项目当前推荐使用预编译的单镜像部署，镜像内同时包含前端静态资源、Nginx 和 `tts-service`：
@@ -170,16 +184,18 @@ MATH_ISLAND_IMAGE=math-island:local ADMIN_PASSWORD=你的密码 docker compose u
 
 ```text
 src/
-  components/      UI 组件（训练壳子、数独面板、古诗组件、通用组件）
+  components/      UI 组件（训练壳子、数独面板、乘法组件、拼音组件、古诗组件、通用组件）
   hooks/           业务 Hook（计时、训练会话、题目逻辑、草稿、古诗朗读）
   lib/             题目生成、数独引擎、存储、TTS / 古诗 API
-  pages/           页面层（Home / 训练页 / 古诗页面）
+  pages/           页面层（Home / 算术 / 拼音 / 训练页 / 古诗页面）
   types/           类型定义
 tts-service/
   src/index.ts     TTS 服务、古诗 CRUD、导入导出、管理密码校验
 scripts/
   generate-sudoku.ts
   test-logic.ts
+  fetch-pinyin-audio.ts
+  test-pinyin.ts
 public/
   puzzles/         预生成数独题库
 ```

@@ -46,7 +46,7 @@ export type LetterEntry =
   | { kind: 'final'; data: Final }
   | { kind: 'whole'; data: WholeSyllable }
 
-// 例字 / 词（用于“汉字联系”阶段，人工白名单）
+// 例字 / 词（用于“汉字练习”阶段，人工白名单）
 export interface ExampleWord {
   hanzi: string // '妈'（单字优先，避开多音字）
   pinyin: string // 'mā'
