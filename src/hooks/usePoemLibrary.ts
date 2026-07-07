@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Poem } from '../types/poem'
 import * as api from '../lib/poems-api'
-import { getPoemsInDisplayOrder } from '../lib/poem-display-order'
 
 export function usePoemLibrary() {
   const [poems, setPoems] = useState<Poem[]>([])
@@ -11,7 +10,7 @@ export function usePoemLibrary() {
     setLoading(true)
     try {
       const all = await api.fetchPoems()
-      setPoems(getPoemsInDisplayOrder(all))
+      setPoems(all)
     } catch (err) {
       console.error('Failed to fetch poems:', err)
     } finally {

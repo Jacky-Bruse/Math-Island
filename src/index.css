@@ -29,7 +29,7 @@
   --color-multiplication-light: #fff3e6;
   --color-pinyin: #14b8a6;
   --color-pinyin-light: #ccfbf1;
-  --font-family-base: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-family-base: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
 }

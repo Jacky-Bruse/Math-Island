@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
-import { saveLastSudokuSize } from '../lib/storage'
 import { hasDraft } from '../lib/db'
 
 const sizes = [
@@ -27,7 +26,6 @@ export default function SudokuSelectPage() {
   }, [])
 
   const handleSelect = (size: number) => {
-    saveLastSudokuSize(size)
     navigate(`/sudoku/${size}`)
   }
 

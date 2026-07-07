@@ -6,7 +6,6 @@ export interface Settings {
   theme: ThemeMode
   sound: boolean
   trainingDuration: 15 | 20 | 30
-  defaultSudokuSize: 4 | 6 | 8
   poemTtsEnabled: boolean
   poemTtsUseCustomService: boolean
   poemTtsServiceUrl: string
@@ -23,7 +22,6 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   sound: true,
   trainingDuration: 20,
-  defaultSudokuSize: 4,
   poemTtsEnabled: true,
   poemTtsUseCustomService: false,
   poemTtsServiceUrl: '',

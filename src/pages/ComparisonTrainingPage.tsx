@@ -7,11 +7,11 @@ import { useComparison } from '../hooks/useComparison'
 
 function HighlightedNumber({
   value,
-  hintUsed,
+  tensHighlighted,
   onesHighlighted,
 }: {
   value: number
-  hintUsed: boolean
+  tensHighlighted: boolean
   onesHighlighted: boolean
 }) {
   const tens = Math.floor(value / 10)
@@ -19,10 +19,10 @@ function HighlightedNumber({
 
   return (
     <span className="text-[clamp(2.6rem,7vw,4.5rem)] font-bold tabular-nums">
-      <span className={`transition-colors duration-300 ${hintUsed ? 'text-red-600' : ''}`}>
+      <span className={`transition-colors duration-300 ${tensHighlighted ? 'text-danger' : ''}`}>
         {tens}
       </span>
-      <span className={`transition-colors duration-300 ${onesHighlighted ? 'text-blue-600' : ''}`}>
+      <span className={`transition-colors duration-300 ${onesHighlighted ? 'text-primary' : ''}`}>
         {ones}
       </span>
     </span>
@@ -36,10 +36,9 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
     const result = comp.answer(choice)
     if (result.correct) {
       ctx.playSound('correct')
+      ctx.recordCorrect()
     } else {
       ctx.playSound('wrong')
-    }
-    if (!result.correct) {
       ctx.recordError()
     }
     if (result.isSubmit) {
@@ -68,11 +67,11 @@ function ComparisonContent({ ctx }: { ctx: TrainingShellContext }) {
       {/* Numbers */}
       <div className={`flex items-center gap-4 md:gap-6 mb-8 md:mb-10 ${errorCount > 0 && !isAutoAdvancing ? 'animate-shake' : ''}`}>
         <div className="w-[clamp(6.8rem,20vw,11rem)] h-[clamp(6.8rem,20vw,11rem)] rounded-2xl md:rounded-3xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
-          <HighlightedNumber value={problem.left} hintUsed={hintUsed} onesHighlighted={onesHighlighted} />
+          <HighlightedNumber value={problem.left} tensHighlighted={hintUsed && !problem.sameTens} onesHighlighted={onesHighlighted} />
         </div>
         <div className="text-[clamp(1.8rem,4.6vw,3rem)] text-text-secondary font-bold">?</div>
         <div className="w-[clamp(6.8rem,20vw,11rem)] h-[clamp(6.8rem,20vw,11rem)] rounded-2xl md:rounded-3xl bg-comparison-light border-2 border-comparison/30 flex items-center justify-center">
-          <HighlightedNumber value={problem.right} hintUsed={hintUsed} onesHighlighted={onesHighlighted} />
+          <HighlightedNumber value={problem.right} tensHighlighted={hintUsed && !problem.sameTens} onesHighlighted={onesHighlighted} />
         </div>
       </div>
 

@@ -16,7 +16,7 @@ export default function PinyinCharactersPage() {
   const { recordCharacterCorrect } = usePinyinProgress()
   const { state, pickOption } = usePinyinPractice()
 
-  const { question, status, wrongPicks, completedCount } = state
+  const { question, status, wrongPicks, completedCount, correctCount } = state
   const { kind, target, options } = question
 
   // 听音选字：新题自动播放目标单字音
@@ -47,7 +47,7 @@ export default function PinyinCharactersPage() {
         <div className="flex items-center gap-3 mb-5">
           <BackButton />
           <h1 className="text-2xl font-extrabold text-text">汉字练习</h1>
-          <span className="ml-auto text-sm text-text-secondary">已完成 {completedCount}</span>
+          <span className="ml-auto text-sm text-text-secondary">答对 {correctCount} / {completedCount}</span>
         </div>
 
         {/* 题面 */}

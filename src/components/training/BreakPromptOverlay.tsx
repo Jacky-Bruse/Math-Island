@@ -4,6 +4,7 @@ interface Props {
   breakSource: BreakSource
   module: TrainingModule
   completedCount: number
+  correctCount: number
   errorCount: number
   onRest: () => void
   onContinue: () => void
@@ -13,12 +14,14 @@ export default function BreakPromptOverlay({
   breakSource,
   module,
   completedCount,
+  correctCount,
   errorCount,
   onRest,
   onContinue,
 }: Props) {
   const isMidway = breakSource === 'midway'
-  const completedLabel = module === 'sudoku' ? '完成盘数' : '完成题目'
+  const isSudoku = module === 'sudoku'
+  const completedLabel = isSudoku ? '完成盘数' : '做了题目'
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
@@ -31,11 +34,17 @@ export default function BreakPromptOverlay({
           {isMidway ? '休息一下再继续吧' : '你做得很棒！休息一下吧'}
         </p>
         {!isMidway && (
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className={`grid gap-3 mb-6 ${isSudoku ? 'grid-cols-2' : 'grid-cols-3'}`}>
             <div className="rounded-2xl bg-primary/10 py-3">
               <div className="text-xs text-text-secondary mb-1">{completedLabel}</div>
               <div className="text-2xl font-bold text-primary tabular-nums">{completedCount}</div>
             </div>
+            {!isSudoku && (
+              <div className="rounded-2xl bg-success/10 py-3">
+                <div className="text-xs text-text-secondary mb-1">答对</div>
+                <div className="text-2xl font-bold text-success tabular-nums">{correctCount}</div>
+              </div>
+            )}
             <div className="rounded-2xl bg-danger-light/20 py-3">
               <div className="text-xs text-text-secondary mb-1">出错次数</div>
               <div className="text-2xl font-bold text-danger tabular-nums">{errorCount}</div>

@@ -66,6 +66,8 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       audioRef.current.pause()
       audioRef.current = null
     }
+    // 同步写 ref：playSegment 的 await 之后立即读取，不能等 effect
+    stateRef.current = 'idle'
     setState('idle')
     setCurrentIndex(-1)
     setError(null)
@@ -175,6 +177,11 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       }
 
       if (stateRef.current === 'idle') return
+      if (stateRef.current === 'paused') {
+        // 合成期间被暂停：记下待播段，resume 时从这里继续
+        pendingNextRef.current = { index, timeoutId: null }
+        return
+      }
 
       const audio = new Audio(url)
       audioRef.current = audio
@@ -185,6 +192,8 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
       }
 
       audio.onended = () => {
+        // 段已播完，置空避免暂停/继续把已结束的音频重播一遍
+        if (audioRef.current === audio) audioRef.current = null
         const nextIdx = currentIndexRef.current + 1
         if (nextIdx < segments.length) {
           const pauseMs = getInterSegmentPauseMs(
@@ -211,10 +220,12 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
         setState('idle')
       }
 
+      stateRef.current = 'playing'
       setState('playing')
       await audio.play()
     } catch {
       setError('语音合成失败，请检查 TTS 服务')
+      stateRef.current = 'idle'
       setState('idle')
     }
   }, [
@@ -226,69 +237,82 @@ export function usePoemTts(poem: Poem | null, settings: Settings): UsePoemTtsRet
     clearPendingNext,
   ])
 
+  const markPlaying = useCallback(() => {
+    stateRef.current = 'playing'
+    setState('playing')
+  }, [])
+
   const play = useCallback(() => {
     if (!poemTtsEnabled || segments.length === 0) return
-    setState('playing')
+    markPlaying()
     playSegment(0)
-  }, [poemTtsEnabled, segments, playSegment])
+  }, [poemTtsEnabled, segments, playSegment, markPlaying])
 
   const pause = useCallback(() => {
-    if (audioRef.current && stateRef.current === 'playing') {
+    if (stateRef.current !== 'playing') return
+    if (audioRef.current) {
       audioRef.current.pause()
+      stateRef.current = 'paused'
       setState('paused')
       return
     }
-    if (pendingNextRef.current.index >= 0 && stateRef.current === 'playing') {
+    if (pendingNextRef.current.index >= 0) {
       const nextIndex = pendingNextRef.current.index
       clearPendingNext()
       pendingNextRef.current = { index: nextIndex, timeoutId: null }
-      setState('paused')
     }
+    // 没有音频也没有段间停顿（合成加载中）：仅标记暂停，playSegment 会兜住
+    stateRef.current = 'paused'
+    setState('paused')
   }, [clearPendingNext])
 
   const resume = useCallback(() => {
-    if (audioRef.current && stateRef.current === 'paused') {
+    if (stateRef.current !== 'paused') return
+    if (audioRef.current) {
       audioRef.current.play()
-      setState('playing')
+      markPlaying()
       return
     }
-    if (pendingNextRef.current.index >= 0 && stateRef.current === 'paused') {
+    if (pendingNextRef.current.index >= 0) {
       const nextIndex = pendingNextRef.current.index
       pendingNextRef.current = { index: -1, timeoutId: null }
-      setState('playing')
+      markPlaying()
       playSegment(nextIndex)
+      return
     }
-  }, [playSegment])
+    // 合成仍在加载中（暂停时还没来得及记录待播段）：恢复 playing，加载完成后自然续播
+    markPlaying()
+  }, [playSegment, markPlaying])
 
   const next = useCallback(() => {
     if (segments.length === 0) return
     const nextIdx = currentIndexRef.current + 1
     if (nextIdx < segments.length) {
-      setState('playing')
+      markPlaying()
       playSegment(nextIdx)
     }
-  }, [segments, playSegment])
+  }, [segments, playSegment, markPlaying])
 
   const prev = useCallback(() => {
     if (segments.length === 0) return
     const prevIdx = currentIndexRef.current - 1
     if (prevIdx >= 0) {
-      setState('playing')
+      markPlaying()
       playSegment(prevIdx)
     }
-  }, [segments, playSegment])
+  }, [segments, playSegment, markPlaying])
 
   const replay = useCallback(() => {
     if (segments.length === 0 || currentIndexRef.current < 0) return
-    setState('playing')
+    markPlaying()
     playSegment(currentIndexRef.current)
-  }, [segments, playSegment])
+  }, [segments, playSegment, markPlaying])
 
   const jumpTo = useCallback((index: number) => {
     if (index < 0 || index >= segments.length) return
-    setState('playing')
+    markPlaying()
     playSegment(index)
-  }, [segments, playSegment])
+  }, [segments, playSegment, markPlaying])
 
   return {
     state,

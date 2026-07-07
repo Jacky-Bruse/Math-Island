@@ -17,7 +17,7 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
   const draft = useSudokuDraft(size)
   const [idleWarning, setIdleWarning] = useState(false)
   const { loadNewPuzzle, restoreFromDraft } = sudoku
-  const { load: loadDraft } = draft
+  const { load: loadDraft, save: saveDraft } = draft
 
   const isInContinue = ctx.state.phase === 'continue'
 
@@ -44,16 +44,19 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
     }
   }, [loadDraft, loadNewPuzzle, restoreFromDraft])
 
+  // 每次盘面/提示次数变化自动存草稿，任何退出路径都不丢进度
+  useEffect(() => {
+    if (sudoku.loading || !sudoku.puzzle || sudoku.isComplete) return
+    saveDraft(sudoku.puzzle.givens, sudoku.puzzle.solution, sudoku.board, sudoku.hintsRemaining)
+  }, [sudoku.loading, sudoku.puzzle, sudoku.isComplete, sudoku.board, sudoku.hintsRemaining, saveDraft])
+
   const handleWarning = useCallback(() => {
     setIdleWarning(true)
   }, [])
 
-  const handleTimeout = useCallback(async () => {
-    if (sudoku.puzzle) {
-      await draft.save(sudoku.puzzle.givens, sudoku.puzzle.solution, sudoku.board, sudoku.hintsRemaining)
-    }
+  const handleTimeout = useCallback(() => {
     ctx.exitToHome()
-  }, [sudoku.puzzle, sudoku.board, sudoku.hintsRemaining, draft, ctx])
+  }, [ctx])
 
   const idle = useSudokuIdle({
     active: isInContinue,
@@ -145,14 +148,7 @@ function SudokuContent({ ctx }: { ctx: TrainingShellContext }) {
           setIdleWarning(false)
           idle.recordAction()
         }}
-        onCancel={() => {
-          void (async () => {
-            if (sudoku.puzzle) {
-              await draft.save(sudoku.puzzle.givens, sudoku.puzzle.solution, sudoku.board, sudoku.hintsRemaining)
-            }
-            ctx.exitToHome()
-          })()
-        }}
+        onCancel={() => ctx.exitToHome()}
         confirmText="继续"
         cancelText="保存退出"
       >

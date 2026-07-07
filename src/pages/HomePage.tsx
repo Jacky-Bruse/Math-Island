@@ -5,7 +5,7 @@ import SettingsPanel from './SettingsPanel'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import { useSettings } from '../hooks/useSettings'
 import { useLongPress } from '../hooks/useLongPress'
-import { clearAllData, saveLastModule } from '../lib/storage'
+import { clearAllData } from '../lib/storage'
 import { clearAllDB } from '../lib/db'
 
 const modules = [
@@ -65,8 +65,7 @@ export default function HomePage() {
   const openSettings = useCallback(() => setSettingsOpen(true), [])
   const longPressProps = useLongPress(openSettings)
 
-  const handleNavigate = (path: string, key: string) => {
-    saveLastModule(key)
+  const handleNavigate = (path: string) => {
     navigate(path)
   }
 
@@ -94,7 +93,7 @@ export default function HomePage() {
           {modules.map(module => (
             <button
               key={module.key}
-              onClick={() => handleNavigate(module.path, module.key)}
+              onClick={() => handleNavigate(module.path)}
               className={`w-full min-h-24 rounded-2xl ${module.color} border ${module.border} shadow-sm px-6 py-5 flex items-center gap-4 active:scale-[0.98] transition-transform`}
             >
               <span className="text-3xl">{module.icon}</span>

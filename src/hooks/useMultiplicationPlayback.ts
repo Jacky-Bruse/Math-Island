@@ -151,6 +151,11 @@ export function useMultiplicationPlayback(settings: Settings) {
       }
 
       if (stateRef.current === 'idle') return
+      if (stateRef.current === 'paused') {
+        // 合成期间被暂停：记下待播段，resume 时从这里继续
+        pendingNextRef.current = { index, timeoutId: null }
+        return
+      }
 
       const audio = new Audio(url)
       audioRef.current = audio
@@ -161,6 +166,8 @@ export function useMultiplicationPlayback(settings: Settings) {
       }
 
       audio.onended = () => {
+        // 段已播完，置空避免暂停/继续把已结束的音频重播一遍
+        if (audioRef.current === audio) audioRef.current = null
         const nextIndex = currentIndexRef.current + 1
         if (nextIndex < activeQueue.facts.length) {
           const pauseMs = getInterSegmentPauseMs(
@@ -205,20 +212,22 @@ export function useMultiplicationPlayback(settings: Settings) {
   }, [playIndex])
 
   const pause = useCallback(() => {
-    if (audioRef.current && stateRef.current === 'playing') {
+    if (stateRef.current !== 'playing') return
+    if (audioRef.current) {
       audioRef.current.pause()
       stateRef.current = 'paused'
       setState('paused')
       return
     }
 
-    if (pendingNextRef.current.index >= 0 && stateRef.current === 'playing') {
+    if (pendingNextRef.current.index >= 0) {
       const nextIndex = pendingNextRef.current.index
       clearPendingNext()
       pendingNextRef.current = { index: nextIndex, timeoutId: null }
-      stateRef.current = 'paused'
-      setState('paused')
     }
+    // 没有音频也没有段间停顿（合成加载中）：仅标记暂停，playIndex 会兜住
+    stateRef.current = 'paused'
+    setState('paused')
   }, [clearPendingNext])
 
   const resume = useCallback(() => {
@@ -235,6 +244,12 @@ export function useMultiplicationPlayback(settings: Settings) {
       stateRef.current = 'playing'
       setState('playing')
       void playIndex(nextIndex)
+      return
+    }
+    if (stateRef.current === 'paused') {
+      // 合成仍在加载中（暂停时还没来得及记录待播段）：恢复 playing，加载完成后自然续播
+      stateRef.current = 'playing'
+      setState('playing')
     }
   }, [playIndex])
 

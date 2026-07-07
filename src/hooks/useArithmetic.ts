@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ArithmeticProblem, ArithmeticRange } from '../types/arithmetic'
 import { generateArithmeticProblem, getHint, getStepExplanation } from '../lib/arithmetic-generator'
 
@@ -13,17 +13,44 @@ interface ArithmeticState {
   isAutoAdvancing: boolean
 }
 
-export function useArithmetic(range: ArithmeticRange) {
-  const [state, setState] = useState<ArithmeticState>(() => ({
-    problem: generateArithmeticProblem(range, 0),
+function createState(range: ArithmeticRange, completedCount: number): ArithmeticState {
+  return {
+    problem: generateArithmeticProblem(range, completedCount),
     input: '',
     errorCount: 0,
     hintUsed: false,
     hintMessage: null,
     showStar: false,
-    completedCount: 0,
+    completedCount,
     isAutoAdvancing: false,
-  }))
+  }
+}
+
+export function useArithmetic(range: ArithmeticRange) {
+  const [state, setState] = useState<ArithmeticState>(() => createState(range, 0))
+  const stateRef = useRef(state)
+  const rangeRef = useRef(range)
+  const pendingNextRef = useRef<number | null>(null)
+
+  stateRef.current = state
+  rangeRef.current = range
+
+  const clearPendingNext = useCallback(() => {
+    if (pendingNextRef.current !== null) {
+      window.clearTimeout(pendingNextRef.current)
+      pendingNextRef.current = null
+    }
+  }, [])
+
+  const scheduleNext = useCallback((nextCount: number, delay: number) => {
+    clearPendingNext()
+    pendingNextRef.current = window.setTimeout(() => {
+      pendingNextRef.current = null
+      setState(createState(rangeRef.current, nextCount))
+    }, delay)
+  }, [clearPendingNext])
+
+  useEffect(() => () => clearPendingNext(), [clearPendingNext])
 
   const inputDigit = useCallback((digit: number) => {
     setState(prev => {
@@ -56,57 +83,30 @@ export function useArithmetic(range: ArithmeticRange) {
   }, [])
 
   const confirm = useCallback((): { correct: boolean; isSubmit: boolean } => {
-    const s = state
-    if (s.isAutoAdvancing || s.input === '') return { correct: false, isSubmit: false }
+    const current = stateRef.current
+    if (current.isAutoAdvancing || current.input === '') return { correct: false, isSubmit: false }
 
-    const answer = parseInt(s.input, 10)
-    const correct = answer === s.problem.answer
+    const answer = parseInt(current.input, 10)
+    const correct = answer === current.problem.answer
 
     if (correct) {
-      const nextCount = s.completedCount + 1
-      setState(prev => ({
-        ...prev,
-        showStar: true,
-        isAutoAdvancing: true,
-      }))
-      setTimeout(() => {
-        setState({
-          problem: generateArithmeticProblem(range, nextCount),
-          input: '',
-          errorCount: 0,
-          hintUsed: false,
-          hintMessage: null,
-          showStar: false,
-          completedCount: nextCount,
-          isAutoAdvancing: false,
-        })
-      }, 800)
+      const nextCount = current.completedCount + 1
+      setState(prev => ({ ...prev, showStar: true, isAutoAdvancing: true }))
+      scheduleNext(nextCount, 800)
       return { correct: true, isSubmit: true }
     }
 
-    const newErrorCount = s.errorCount + 1
+    const newErrorCount = current.errorCount + 1
     if (newErrorCount >= 2) {
-      const explanation = getStepExplanation(s.problem)
-      const nextCount = s.completedCount + 1
+      const nextCount = current.completedCount + 1
       setState(prev => ({
         ...prev,
         errorCount: newErrorCount,
-        hintMessage: explanation,
+        hintMessage: getStepExplanation(prev.problem),
         input: '',
         isAutoAdvancing: true,
       }))
-      setTimeout(() => {
-        setState({
-          problem: generateArithmeticProblem(range, nextCount),
-          input: '',
-          errorCount: 0,
-          hintUsed: false,
-          hintMessage: null,
-          showStar: false,
-          completedCount: nextCount,
-          isAutoAdvancing: false,
-        })
-      }, 1300)
+      scheduleNext(nextCount, 1300)
       return { correct: false, isSubmit: true }
     }
 
@@ -117,7 +117,7 @@ export function useArithmetic(range: ArithmeticRange) {
       hintMessage: 'No，再试一次',
     }))
     return { correct: false, isSubmit: false }
-  }, [state, range])
+  }, [scheduleNext])
 
   return {
     problem: state.problem,

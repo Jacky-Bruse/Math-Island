@@ -19,10 +19,9 @@ function ArithmeticContent({ ctx }: { ctx: TrainingShellContext }) {
     const result = arith.confirm()
     if (result.correct) {
       ctx.playSound('correct')
+      ctx.recordCorrect()
     } else {
       ctx.playSound('wrong')
-    }
-    if (!result.correct) {
       ctx.recordError()
     }
     if (result.isSubmit) {

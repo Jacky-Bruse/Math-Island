@@ -62,9 +62,10 @@ function reducer(state: TrainingState, action: TrainingAction): TrainingState {
     case 'REST_DONE': {
       if (state.phase !== 'resting') return state
       if (state.breakSource === 'midway') {
+        // 休息时长不计入训练时间：把 startedAt 向后平移休息耗时
         return {
           phase: 'running',
-          startedAt: state.startedAt,
+          startedAt: state.startedAt + (Date.now() - state.restStartedAt),
           checkpoints: state.checkpoints,
         }
       }

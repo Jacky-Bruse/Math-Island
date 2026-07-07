@@ -9,7 +9,8 @@ export interface PinyinPracticeState {
   status: PracticeStatus
   errorCount: number
   wrongPicks: string[] // 选错的汉字
-  completedCount: number
+  completedCount: number // 做过的题数（含答错被揭示的）
+  correctCount: number // 答对的题数
 }
 
 interface PickResult {
@@ -24,6 +25,7 @@ export function usePinyinPractice() {
     errorCount: 0,
     wrongPicks: [],
     completedCount: 0,
+    correctCount: 0,
   }))
   const stateRef = useRef(state)
   stateRef.current = state
@@ -45,6 +47,7 @@ export function usePinyinPractice() {
       wrongPicks: [],
       // 解决一题后才计数（纯函数：基于 prev）
       completedCount: prev.completedCount + (prev.status !== 'answering' ? 1 : 0),
+      correctCount: prev.correctCount + (prev.status === 'correct' ? 1 : 0),
     }))
   }, [clearTimer])
 

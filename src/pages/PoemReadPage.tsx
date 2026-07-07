@@ -5,21 +5,20 @@ import BackButton from '../components/shared/BackButton'
 import PoemPlaybackBar from '../components/poem/PoemPlaybackBar'
 import PoemPageNavigation from '../components/poem/PoemPageNavigation'
 import PasswordDialog from '../components/shared/PasswordDialog'
-import { fetchPoem, hasAdminAccess } from '../lib/poems-api'
+import { hasAdminAccess } from '../lib/poems-api'
 import { getPoemNavigationContext } from '../lib/poem-navigation'
 import { checkTtsHealth, getTtsBaseUrl } from '../lib/tts'
 import { usePoemLibrary } from '../hooks/usePoemLibrary'
 import { usePoemTts } from '../hooks/usePoemTts'
 import { useSettings } from '../hooks/useSettings'
-import type { Poem } from '../types/poem'
 
 export default function PoemReadPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { settings } = useSettings()
-  const { poems } = usePoemLibrary()
-  const [poem, setPoem] = useState<Poem | null>(null)
-  const [loading, setLoading] = useState(true)
+  // 当前诗直接取自诗库列表（列表已含全文），不再对单首诗二次请求
+  const { poems, loading } = usePoemLibrary()
+  const poem = poems.find(p => p.id === id) ?? null
   const [ttsAvailable, setTtsAvailable] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -27,18 +26,6 @@ export default function PoemReadPage() {
   const { state, currentIndex, segments, play, pause, resume, stop, next, prev, replay, jumpTo, error } = tts
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
   const navigation = getPoemNavigationContext(poems, poem?.id ?? id)
-
-  useEffect(() => {
-    if (!id) return
-    setLoading(true)
-    fetchPoem(id).then(p => {
-      setPoem(p)
-      setLoading(false)
-    }).catch(() => {
-      setPoem(null)
-      setLoading(false)
-    })
-  }, [id])
 
   useEffect(() => {
     if (!settings.poemTtsEnabled) return

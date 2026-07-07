@@ -24,6 +24,7 @@ export interface TrainingShellContext {
   finish: () => void
   exitToHome: () => void
   recordCompleted: (count?: number) => void
+  recordCorrect: (count?: number) => void
   recordError: (count?: number) => void
   playSound: (type: SoundType) => void
   isMuted: boolean
@@ -31,6 +32,7 @@ export interface TrainingShellContext {
 
 interface TrainingStats {
   completedCount: number
+  correctCount: number
   errorCount: number
 }
 
@@ -45,7 +47,7 @@ export default function TrainingShell({ module, children }: Props) {
   const [elapsed, setElapsed] = useState(0)
   const [exitConfirm, setExitConfirm] = useState(false)
   const [summaryOpen, setSummaryOpen] = useState(false)
-  const [stats, setStats] = useState<TrainingStats>({ completedCount: 0, errorCount: 0 })
+  const [stats, setStats] = useState<TrainingStats>({ completedCount: 0, correctCount: 0, errorCount: 0 })
 
   const onCheckpoint = useCallback(triggerCheckpoint, [triggerCheckpoint])
 
@@ -98,6 +100,11 @@ export default function TrainingShell({ module, children }: Props) {
     setStats(prev => ({ ...prev, completedCount: prev.completedCount + count }))
   }, [])
 
+  const recordCorrect = useCallback((count = 1) => {
+    if (count <= 0) return
+    setStats(prev => ({ ...prev, correctCount: prev.correctCount + count }))
+  }, [])
+
   const recordError = useCallback((count = 1) => {
     if (count <= 0) return
     setStats(prev => ({ ...prev, errorCount: prev.errorCount + count }))
@@ -120,6 +127,7 @@ export default function TrainingShell({ module, children }: Props) {
     finish,
     exitToHome,
     recordCompleted,
+    recordCorrect,
     recordError,
     playSound,
     isMuted: !settings.sound,
@@ -144,9 +152,9 @@ export default function TrainingShell({ module, children }: Props) {
         <MuteToggle isMuted={!settings.sound} onToggle={toggleMute} />
       </div>
 
-      {/* Content */}
+      {/* Content：始终挂载，休息/结束用全屏 overlay 覆盖，避免卸载丢失做题进度 */}
       <div className="flex-1 flex flex-col">
-        {(state.phase === 'running' || state.phase === 'continue') && children(ctx)}
+        {children(ctx)}
       </div>
 
       {/* Overlays */}
@@ -155,6 +163,7 @@ export default function TrainingShell({ module, children }: Props) {
           breakSource={state.breakSource}
           module={module}
           completedCount={stats.completedCount}
+          correctCount={stats.correctCount}
           errorCount={stats.errorCount}
           onRest={chooseRest}
           onContinue={state.breakSource === 'midway' ? chooseContinueTraining : chooseContinue}
@@ -173,6 +182,7 @@ export default function TrainingShell({ module, children }: Props) {
         open={summaryOpen}
         module={module}
         completedCount={stats.completedCount}
+        correctCount={stats.correctCount}
         errorCount={stats.errorCount}
         onGoHome={finishToHome}
       />
@@ -186,7 +196,11 @@ export default function TrainingShell({ module, children }: Props) {
         confirmText="退出"
         cancelText="继续训练"
       >
-        <p>退出后当前训练进度不会保存，确定退出吗？</p>
+        <p>
+          {module === 'sudoku'
+            ? '数独进度已自动保存，下次进入可以继续，确定退出吗？'
+            : '退出后当前训练进度不会保存，确定退出吗？'}
+        </p>
       </ConfirmDialog>
     </div>
   )

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ComparisonProblem } from '../types/comparison'
 import { generateComparisonProblem, getComparisonHint } from '../lib/comparison-generator'
 
@@ -12,61 +12,65 @@ interface ComparisonState {
   isAutoAdvancing: boolean
 }
 
-export function useComparison() {
-  const [state, setState] = useState<ComparisonState>(() => ({
-    problem: generateComparisonProblem(0),
+function createState(completedCount: number): ComparisonState {
+  return {
+    problem: generateComparisonProblem(completedCount),
     errorCount: 0,
     hintUsed: false,
     hintMessage: null,
     showStar: false,
-    completedCount: 0,
+    completedCount,
     isAutoAdvancing: false,
-  }))
+  }
+}
+
+export function useComparison() {
+  const [state, setState] = useState<ComparisonState>(() => createState(0))
+  const stateRef = useRef(state)
+  const pendingNextRef = useRef<number | null>(null)
+
+  stateRef.current = state
+
+  const clearPendingNext = useCallback(() => {
+    if (pendingNextRef.current !== null) {
+      window.clearTimeout(pendingNextRef.current)
+      pendingNextRef.current = null
+    }
+  }, [])
+
+  const scheduleNext = useCallback((nextCount: number, delay: number) => {
+    clearPendingNext()
+    pendingNextRef.current = window.setTimeout(() => {
+      pendingNextRef.current = null
+      setState(createState(nextCount))
+    }, delay)
+  }, [clearPendingNext])
+
+  useEffect(() => () => clearPendingNext(), [clearPendingNext])
 
   const answer = useCallback((choice: '>' | '<'): { correct: boolean; isSubmit: boolean } => {
-    const s = state
-    if (s.isAutoAdvancing) return { correct: false, isSubmit: false }
+    const current = stateRef.current
+    if (current.isAutoAdvancing) return { correct: false, isSubmit: false }
 
-    const correct = choice === s.problem.correctAnswer
+    const correct = choice === current.problem.correctAnswer
 
     if (correct) {
-      const nextCount = s.completedCount + 1
+      const nextCount = current.completedCount + 1
       setState(prev => ({ ...prev, showStar: true, isAutoAdvancing: true }))
-      setTimeout(() => {
-        setState({
-          problem: generateComparisonProblem(nextCount),
-          errorCount: 0,
-          hintUsed: false,
-          hintMessage: null,
-          showStar: false,
-          completedCount: nextCount,
-          isAutoAdvancing: false,
-        })
-      }, 800)
+      scheduleNext(nextCount, 800)
       return { correct: true, isSubmit: true }
     }
 
-    const newErrorCount = s.errorCount + 1
+    const newErrorCount = current.errorCount + 1
     if (newErrorCount >= 2) {
-      const hint = getComparisonHint(s.problem)
-      const nextCount = s.completedCount + 1
+      const nextCount = current.completedCount + 1
       setState(prev => ({
         ...prev,
         errorCount: newErrorCount,
-        hintMessage: hint,
+        hintMessage: getComparisonHint(prev.problem),
         isAutoAdvancing: true,
       }))
-      setTimeout(() => {
-        setState({
-          problem: generateComparisonProblem(nextCount),
-          errorCount: 0,
-          hintUsed: false,
-          hintMessage: null,
-          showStar: false,
-          completedCount: nextCount,
-          isAutoAdvancing: false,
-        })
-      }, 1300)
+      scheduleNext(nextCount, 1300)
       return { correct: false, isSubmit: true }
     }
 
@@ -76,7 +80,7 @@ export function useComparison() {
       hintMessage: 'No，再试一次',
     }))
     return { correct: false, isSubmit: false }
-  }, [state])
+  }, [scheduleNext])
 
   const requestHint = useCallback(() => {
     setState(prev => {

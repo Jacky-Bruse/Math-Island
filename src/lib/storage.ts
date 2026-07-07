@@ -7,11 +7,15 @@ const PREFIX = 'math-island:'
 
 const KEYS = {
   settings: `${PREFIX}settings`,
-  lastModule: `${PREFIX}lastModule`,
-  lastArithRange: `${PREFIX}lastArithRange`,
-  lastSudokuSize: `${PREFIX}lastSudokuSize`,
   pinyinProgress: `${PREFIX}pinyin-progress`,
 } as const
+
+// 历史版本写过、现已废弃的 key，清空数据时一并移除
+const LEGACY_KEYS = [
+  `${PREFIX}lastModule`,
+  `${PREFIX}lastArithRange`,
+  `${PREFIX}lastSudokuSize`,
+]
 
 export function loadSettings(): Settings {
   try {
@@ -26,32 +30,6 @@ export function loadSettings(): Settings {
 
 export function saveSettings(settings: Settings): void {
   localStorage.setItem(KEYS.settings, JSON.stringify(settings))
-}
-
-export function loadLastModule(): string | null {
-  return localStorage.getItem(KEYS.lastModule)
-}
-
-export function saveLastModule(module: string): void {
-  localStorage.setItem(KEYS.lastModule, module)
-}
-
-export function loadLastArithRange(): number | null {
-  const val = localStorage.getItem(KEYS.lastArithRange)
-  return val ? Number(val) : null
-}
-
-export function saveLastArithRange(range: number): void {
-  localStorage.setItem(KEYS.lastArithRange, String(range))
-}
-
-export function loadLastSudokuSize(): number | null {
-  const val = localStorage.getItem(KEYS.lastSudokuSize)
-  return val ? Number(val) : null
-}
-
-export function saveLastSudokuSize(size: number): void {
-  localStorage.setItem(KEYS.lastSudokuSize, String(size))
 }
 
 function freshPinyinProgress(): PinyinProgress {
@@ -81,5 +59,5 @@ export function savePinyinProgress(progress: PinyinProgress): void {
 }
 
 export function clearAllData(): void {
-  Object.values(KEYS).forEach(key => localStorage.removeItem(key))
+  [...Object.values(KEYS), ...LEGACY_KEYS].forEach(key => localStorage.removeItem(key))
 }

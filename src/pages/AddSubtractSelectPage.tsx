@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
-import { saveLastArithRange } from '../lib/storage'
 
 const ranges = [
   { value: 10, label: '10以内', desc: '基础入门' },
@@ -13,7 +12,6 @@ export default function AddSubtractSelectPage() {
   const navigate = useNavigate()
 
   const handleSelect = (range: number) => {
-    saveLastArithRange(range)
     navigate(`/arithmetic/add-subtract/${range}`)
   }
 

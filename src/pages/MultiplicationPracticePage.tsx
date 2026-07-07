@@ -18,10 +18,9 @@ function MultiplicationPracticeContent({ ctx }: { ctx: TrainingShellContext }) {
     const result = practice.confirm()
     if (result.correct) {
       ctx.playSound('correct')
+      ctx.recordCorrect()
     } else {
       ctx.playSound('wrong')
-    }
-    if (!result.correct) {
       ctx.recordError()
     }
     if (result.isSubmit) {

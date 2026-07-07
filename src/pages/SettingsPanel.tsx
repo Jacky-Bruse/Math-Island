@@ -156,23 +156,6 @@ export default function SettingsPanel({ open, settings, onUpdate, onClose, onCle
           </div>
         </div>
 
-        <div className="py-3 border-b border-border">
-          <span className="font-medium">数独默认尺寸</span>
-          <div className="flex gap-2 mt-2">
-            {([4, 6, 8] as const).map(size => (
-              <button
-                key={size}
-                onClick={() => onUpdate({ defaultSudokuSize: size })}
-                className={`flex-1 min-h-12 rounded-xl font-semibold transition-colors ${
-                  settings.defaultSudokuSize === size ? 'bg-sudoku text-white' : 'bg-surface-muted text-text'
-                }`}
-              >
-                {size}x{size}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="mt-2 py-3 border-b border-border">
           <div className="text-sm font-bold text-poem mb-3">古诗朗读</div>
 
