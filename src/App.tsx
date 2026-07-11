@@ -8,6 +8,8 @@ import MultiplicationTablePage from './pages/MultiplicationTablePage'
 import MultiplicationUnderstandPage from './pages/MultiplicationUnderstandPage'
 import MultiplicationPracticeSelectPage from './pages/MultiplicationPracticeSelectPage'
 import MultiplicationPracticePage from './pages/MultiplicationPracticePage'
+import GameSelectPage from './pages/GameSelectPage'
+import RobotCourierPage from './pages/RobotCourierPage'
 import SudokuSelectPage from './pages/SudokuSelectPage'
 import SudokuTrainingPage from './pages/SudokuTrainingPage'
 import PoemListPage from './pages/PoemListPage'
@@ -30,9 +32,11 @@ export default function App() {
       <Route path="/arithmetic/multiplication/practice" element={<MultiplicationPracticeSelectPage />} />
       <Route path="/arithmetic/multiplication/practice/:level" element={<MultiplicationPracticePage />} />
       <Route path="/arithmetic/:range" element={<ArithmeticTrainingPage />} />
-      <Route path="/comparison" element={<ComparisonTrainingPage />} />
-      <Route path="/sudoku" element={<SudokuSelectPage />} />
-      <Route path="/sudoku/:size" element={<SudokuTrainingPage />} />
+      <Route path="/arithmetic/comparison" element={<ComparisonTrainingPage />} />
+      <Route path="/games" element={<GameSelectPage />} />
+      <Route path="/games/robot-courier" element={<RobotCourierPage />} />
+      <Route path="/games/sudoku" element={<SudokuSelectPage />} />
+      <Route path="/games/sudoku/:size" element={<SudokuTrainingPage />} />
       <Route path="/poems" element={<PoemListPage />} />
       <Route path="/poems/edit" element={<PoemEditorPage />} />
       <Route path="/poems/edit/:id" element={<PoemEditorPage />} />

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "fetch-audio": "tsx scripts/fetch-pinyin-audio.ts",
     "check-audio": "tsx scripts/fetch-pinyin-audio.ts --check",
-    "test:pinyin": "tsx scripts/test-pinyin.ts"
+    "test:pinyin": "tsx scripts/test-pinyin.ts",
+    "test:robot-courier": "tsx scripts/test-robot-courier.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.1",

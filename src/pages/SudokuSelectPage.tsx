@@ -26,7 +26,7 @@ export default function SudokuSelectPage() {
   }, [])
 
   const handleSelect = (size: number) => {
-    navigate(`/sudoku/${size}`)
+    navigate(`/games/sudoku/${size}`)
   }
 
   return (

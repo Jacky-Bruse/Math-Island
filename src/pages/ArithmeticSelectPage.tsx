@@ -19,6 +19,14 @@ const modules = [
     className: 'bg-multiplication-light border-multiplication/20',
     icon: '🍎',
   },
+  {
+    key: 'comparison',
+    title: '比大小',
+    desc: '两位数比较',
+    path: '/arithmetic/comparison',
+    className: 'bg-comparison-light border-comparison/20',
+    icon: '🔘',
+  },
 ] as const
 
 export default function ArithmeticSelectPage() {
