@@ -1,5 +1,4 @@
 // 拼音学习模块（拼音岛）类型定义
-// 设计见 docs/plans/2026-06-09-pinyin-learning-design.md
 
 export type Tone = 1 | 2 | 3 | 4
 

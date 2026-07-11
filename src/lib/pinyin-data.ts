@@ -1,6 +1,5 @@
 // 拼音课程静态数据（纯数据，查询/出题在 pinyin-practice.ts，拼读合法性在 pinyin-syllables.ts）
 // 顺序依统编版一年级上册：单韵母 → 声母分组 → 复韵母/鼻韵母，整体认读音节穿插。
-// 设计见 docs/plans/2026-06-09-pinyin-learning-design.md
 
 import type { Initial, Final, WholeSyllable, LetterEntry, ExampleWord } from '../types/pinyin'
 

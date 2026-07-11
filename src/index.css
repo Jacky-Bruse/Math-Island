@@ -37,7 +37,6 @@
 /*
  * 乘法模块实色令牌。使用 @theme static 强制输出全部变量（不做 tree-shaking），
  * 既生成 bg-mult-* / text-mult-* / border-mult-* 工具类，又可在任意值 var() 中引用。
- * 详见 docs/plans/2026-06-08-dark-mode-design.md §3.6。
  */
 @theme static {
   --color-mult-ink: #9a3412;
@@ -74,7 +73,6 @@
  * 深色主题覆盖（暖棕灰基调）。
  * 必须是 unlayered（非 @layer）规则：CSS 层级优先于特异性，
  * unlayered 才能稳定胜过 @layer theme 里 :root 的浅色默认值。
- * 详见 docs/plans/2026-06-08-dark-mode-design.md §3.4。
  */
 .dark {
   color-scheme: dark;
