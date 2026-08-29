@@ -1,5 +1,5 @@
-// 拼读合法性：唯一数据源为本课程目标音节表（pinyin-syllables.generated.ts，依音频存在性逐声调生成）。
-// 校验“声母+韵母”是否合法、产出正写结果、并给出实际有录音的声调，供 BlendBuilder 使用。
+// 拼读合法性：课程音节范围与具体音频源分离。
+// generated 表的 base 键作为已确认的课程范围；四声音频完整性由测试在发布前校验。
 
 import { blendBase, applyToneMark, toAudioKey } from './pinyin-orthography'
 import { getInitialById, getFinalById } from './pinyin-data'
@@ -14,11 +14,15 @@ const DENYLIST = new Set<string>([
   'fe', 'lo', 'cei', 'tei', 'kei', 'nun', 'nou',
 ])
 
-const toneMap = new Map<string, Tone[]>(
-  Object.entries(VALID_BLEND_SYLLABLES)
-    .filter(([base]) => !DENYLIST.has(base))
-    .map(([base, tones]) => [base, tones as Tone[]]),
+const TONES: Tone[] = [1, 2, 3, 4]
+const validBases = new Set(
+  Object.keys(VALID_BLEND_SYLLABLES).filter(base => !DENYLIST.has(base)),
 )
+
+// j/q/x 后写作 u、un 的音实际属于 ü、ün；只允许孩子从 ü、ün 入口选择。
+function isDuplicateJqxPath(initialId: string, finalId: string): boolean {
+  return ['j', 'q', 'x'].includes(initialId) && ['u', 'uen'].includes(finalId)
+}
 
 /** 由声母/韵母 id 计算无调正写 base（ü 保留）；非法或 y/w 返回 null。 */
 export function blendBaseFor(initialId: string, finalId: string): string | null {
@@ -28,24 +32,23 @@ export function blendBaseFor(initialId: string, finalId: string): string | null 
   return blendBase(ini.id, fin.canonicalFinal)
 }
 
-/** “声母+韵母”是否为本课程目标音节表中的合法音节（至少一个声调有录音）。 */
+/** “声母+韵母”是否属于本课程目标音节范围。 */
 export function isValidBlend(initialId: string, finalId: string): boolean {
+  if (isDuplicateJqxPath(initialId, finalId)) return false
   const base = blendBaseFor(initialId, finalId)
-  return base != null && toneMap.has(base)
+  return base != null && validBases.has(base)
 }
 
-/** 该“声母+韵母”实际有录音的声调列表（无则空数组）。 */
+/** 该“声母+韵母”的课程声调列表（无效组合返回空数组）。 */
 export function availableTones(initialId: string, finalId: string): Tone[] {
-  const base = blendBaseFor(initialId, finalId)
-  return base ? toneMap.get(base) ?? [] : []
+  return isValidBlend(initialId, finalId) ? [...TONES] : []
 }
 
-/** 合法且该声调有录音则返回结构化结果，否则 null（避免请求不存在的音频）。 */
+/** 合法组合返回结构化结果，否则 null。 */
 export function toSyllable(initialId: string, finalId: string, tone: Tone): SyllableResult | null {
+  if (!isValidBlend(initialId, finalId)) return null
   const base = blendBaseFor(initialId, finalId)
   if (!base) return null
-  const tones = toneMap.get(base)
-  if (!tones || !tones.includes(tone)) return null
   return {
     display: applyToneMark(base, tone),
     audioKey: toAudioKey(base, tone),
@@ -55,5 +58,5 @@ export function toSyllable(initialId: string, finalId: string, tone: Tone): Syll
 }
 
 export function isValidBase(base: string): boolean {
-  return toneMap.has(base)
+  return validBases.has(base)
 }

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BLEND_INITIALS, BLEND_FINALS } from '../../lib/pinyin-data'
-import { isValidBlend, toSyllable, availableTones } from '../../lib/pinyin-syllables'
+import { isValidBlend, toSyllable } from '../../lib/pinyin-syllables'
 import type { Tone, Initial, Final } from '../../types/pinyin'
 
 interface Props {
@@ -9,103 +9,123 @@ interface Props {
 }
 
 const TONES: Tone[] = [1, 2, 3, 4]
-const TONE_LABEL: Record<Tone, string> = { 1: '一声 ˉ', 2: '二声 ´', 3: '三声 ˇ', 4: '四声 `' }
+const TONE_LABEL: Record<Tone, string> = {
+  1: '一声 ˉ',
+  2: '二声 ˊ',
+  3: '三声 ˇ',
+  4: '四声 ˋ',
+}
+
+function optionClass(active: boolean): string {
+  const state = active
+    ? 'border-pinyin bg-pinyin text-white shadow-sm'
+    : 'border-border-strong bg-surface text-text hover:border-pinyin/60 hover:bg-pinyin-light'
+  return `inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-3 font-extrabold transition-[transform,border-color,background-color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pinyin active:scale-95 ${state}`
+}
 
 export default function BlendBuilder({ onPlay, onBlended }: Props) {
-  const [ini, setIni] = useState<Initial | null>(null)
-  const [fin, setFin] = useState<Final | null>(null)
+  const [ini, setIni] = useState<Initial | null>(BLEND_INITIALS[0] ?? null)
+  const [fin, setFin] = useState<Final | null>(BLEND_FINALS[0] ?? null)
   const [tone, setTone] = useState<Tone>(1)
+  const mountedRef = useRef(false)
 
-  const comboValid = ini && fin ? isValidBlend(ini.id, fin.id) : null
-  const tones = ini && fin ? availableTones(ini.id, fin.id) : []
-  const result = ini && fin && comboValid ? toSyllable(ini.id, fin.id, tone) : null
+  const result = ini && fin ? toSyllable(ini.id, fin.id, tone) : null
 
-  // 组合变化后，若当前声调无录音则切到第一个可用声调（避免请求不存在的音频）
   useEffect(() => {
-    if (tones.length && !tones.includes(tone)) setTone(tones[0])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tones.join(',')])
-
-  // 拼出合法音节时自动播放并记录
-  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true
+      return
+    }
     if (result) {
       onPlay(result.audioKey)
       onBlended(result.audioKey)
     }
-    // 仅在音节 key 变化时触发
+    // 只在用户改变带调音节后播放和记录；默认展示的 bā 不自动播放。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result?.audioKey])
 
-  const chip = (active: boolean) =>
-    `min-w-11 px-3 py-2 rounded-xl text-lg font-bold border active:scale-95 transition-transform ${
-      active ? 'bg-pinyin text-white border-pinyin' : 'bg-surface text-text border-border'
-    }`
+  const selectInitial = (next: Initial) => {
+    setIni(next)
+  }
+
+  const selectFinal = (next: Final) => {
+    setFin(next)
+  }
+
+  const emptyLabel = ini ? '请选择韵母' : fin ? '请选择声母' : '请选择声母和韵母'
+  const invalidPair = !!ini && !!fin && !isValidBlend(ini.id, fin.id)
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* 拼出结果 */}
-      <div className="rounded-2xl bg-pinyin-light border border-pinyin/20 p-5 min-h-28 flex flex-col items-center justify-center">
-        {result ? (
-          <>
-            <div className="text-5xl font-extrabold text-pinyin">{result.display}</div>
-            <button
-              onClick={() => onPlay(result.audioKey)}
-              className="mt-3 text-sm px-4 py-1.5 rounded-full bg-pinyin text-white active:scale-95 transition-transform"
-            >
-              ▶ 再听一次
-            </button>
-          </>
-        ) : comboValid === false ? (
-          <p className="text-text-secondary text-sm">这两个拼不成音哦，换一个试试 🙂</p>
-        ) : (
-          <p className="text-text-secondary text-sm">选一个声母 + 一个韵母 + 声调，拼拼看</p>
+    <div className="space-y-5">
+      <section
+        aria-label="拼读结果"
+        aria-live="polite"
+        className="flex min-h-32 flex-col items-center justify-center rounded-2xl border border-pinyin/30 bg-pinyin-light px-4 py-5 text-center shadow-sm"
+      >
+        <div className={`${result ? 'text-5xl text-pinyin' : `text-xl ${invalidPair ? 'text-danger' : 'text-pinyin'}`} font-extrabold`}>
+          {result?.display ?? (invalidPair ? '不能拼读，换一个试试' : emptyLabel)}
+        </div>
+        {result && (
+          <button
+            type="button"
+            onClick={() => onPlay(result.audioKey)}
+            className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-pinyin px-5 text-sm font-bold text-white shadow-sm transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pinyin active:scale-95"
+          >
+            ▶ 再听一次
+          </button>
         )}
-      </div>
+      </section>
 
-      {/* 声母 */}
-      <div>
-        <div className="text-xs text-text-secondary mb-1.5">声母</div>
-        <div className="flex flex-wrap gap-1.5">
-          {BLEND_INITIALS.map(i => (
-            <button key={i.id} onClick={() => setIni(i)} className={chip(ini?.id === i.id)}>
-              {i.letter}
+      <section aria-labelledby="blend-initial-title">
+        <h2 id="blend-initial-title" className="mb-2 text-sm font-bold text-text-secondary">声母</h2>
+        <div className="flex flex-wrap gap-2">
+          {BLEND_INITIALS.map(item => (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => selectInitial(item)}
+              aria-pressed={ini?.id === item.id}
+              className={`${optionClass(ini?.id === item.id)} text-base`}
+            >
+              {item.letter}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* 韵母 */}
-      <div>
-        <div className="text-xs text-text-secondary mb-1.5">韵母</div>
-        <div className="flex flex-wrap gap-1.5">
-          {BLEND_FINALS.map(f => (
-            <button key={f.id} onClick={() => setFin(f)} className={chip(fin?.id === f.id)}>
-              {f.displayFinal}
+      <section aria-labelledby="blend-final-title">
+        <h2 id="blend-final-title" className="mb-2 text-sm font-bold text-text-secondary">韵母</h2>
+        <div className="flex flex-wrap gap-2">
+          {BLEND_FINALS.map(item => (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => selectFinal(item)}
+              aria-pressed={fin?.id === item.id}
+              className={`${optionClass(fin?.id === item.id)} text-base`}
+            >
+              {item.displayFinal}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* 声调 */}
-      <div>
-        <div className="text-xs text-text-secondary mb-1.5">声调</div>
-        <div className="grid grid-cols-4 gap-1.5">
-          {TONES.map(t => {
-            // 组合已选但该声调无录音 → 禁用
-            const unavailable = !!(ini && fin && comboValid && !tones.includes(t))
-            return (
-              <button
-                key={t}
-                onClick={() => setTone(t)}
-                disabled={unavailable}
-                className={`${chip(tone === t)} ${unavailable ? 'opacity-30' : ''}`}
-              >
-                {TONE_LABEL[t]}
-              </button>
-            )
-          })}
+      <section aria-labelledby="blend-tone-title">
+        <h2 id="blend-tone-title" className="mb-2 text-sm font-bold text-text-secondary">声调</h2>
+        <div className="grid grid-cols-4 gap-2">
+          {TONES.map(itemTone => (
+            <button
+              type="button"
+              key={itemTone}
+              onClick={() => setTone(itemTone)}
+              aria-pressed={tone === itemTone}
+              className={`${optionClass(tone === itemTone)} px-2 text-sm sm:text-base`}
+            >
+              {TONE_LABEL[itemTone]}
+            </button>
+          ))}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

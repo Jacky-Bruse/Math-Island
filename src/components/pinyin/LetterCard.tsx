@@ -11,7 +11,8 @@ export default function LetterCard({ label, accentClass, learned, onClick, title
     <button
       onClick={onClick}
       title={title}
-      className="relative aspect-square rounded-2xl bg-surface border border-border shadow-sm flex items-center justify-center active:scale-95 transition-transform"
+      aria-label={`${label}${learned ? '，已学过' : ''}`}
+      className="relative aspect-square min-h-11 rounded-2xl bg-surface border border-border shadow-sm flex items-center justify-center transition-[transform,border-color,box-shadow] hover:border-border-strong hover:shadow-md active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pinyin"
     >
       <span className={`text-2xl font-extrabold ${accentClass}`}>{label}</span>
       {learned && (

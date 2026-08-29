@@ -1,5 +1,5 @@
-// 【自动生成】由 scripts/fetch-pinyin-audio.ts 依 audio-cmn 音频存在性生成，请勿手改。
-// 本课程目标音节表：无调正写 base（ü 保留为 ü）→ 实际有录音的声调列表。共 295 个。
+// 【课程基线】最初由 scripts/fetch-pinyin-audio.ts 生成，请勿手改。
+// 运行时仅使用 base 键判断课程范围；声调和 Yabla 文件完整性由测试独立校验。共 295 个。
 
 export const VALID_BLEND_SYLLABLES: Record<string, number[]> = {
   "ba": [1, 2, 3, 4],

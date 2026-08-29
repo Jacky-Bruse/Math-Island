@@ -12,3 +12,6 @@ export const DAV_RAW = `https://raw.githubusercontent.com/${DAV_REPO}/master/mp3
 // - chi1~chi4：同时供声母 ch 与整体认读 chi（hugolpz 录音偏 zh）。
 //   ch+i 放开拼读后需四声切换，四声全切 davinfifield 以保证同一人声。
 export const DAV_OVERRIDE_KEYS: string[] = ['a1', 'a2', 'a3', 'a4', 'chi1', 'chi2', 'chi3', 'chi4']
+
+// 认字母页优先使用 Yabla；下载源缺少 ei1，继续使用原 syllabs 录音。
+export const YABLA_LETTER_FALLBACK_KEYS: string[] = ['ei1']

@@ -28,5 +28,11 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# Locally downloaded Yabla audio (not licensed for redistribution)
+docs/yabla_mp3/
+
+# Local agent planning state
+.planning/
+
 # TypeScript cache
 *.tsbuildinfo

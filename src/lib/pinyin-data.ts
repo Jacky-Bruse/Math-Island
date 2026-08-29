@@ -48,18 +48,20 @@ export const FINALS: Final[] = [
   { id: 'iou', displayFinal: 'iu', canonicalFinal: 'iou', audioRepresentative: 'you1', category: 'compound-final' },
   { id: 'ie', displayFinal: 'ie', canonicalFinal: 'ie', audioRepresentative: 'ye1', category: 'compound-final' },
   { id: 'ue', displayFinal: 'üe', canonicalFinal: 'üe', audioRepresentative: 'yue1', category: 'compound-final' },
-  { id: 'er', displayFinal: 'er', canonicalFinal: 'er', audioRepresentative: 'er1', category: 'compound-final' },
-  // 鼻韵母
-  { id: 'an', displayFinal: 'an', canonicalFinal: 'an', audioRepresentative: 'an1', category: 'nasal-final' },
-  { id: 'en', displayFinal: 'en', canonicalFinal: 'en', audioRepresentative: 'en1', category: 'nasal-final' },
-  { id: 'in', displayFinal: 'in', canonicalFinal: 'in', audioRepresentative: 'yin1', category: 'nasal-final' },
-  { id: 'uen', displayFinal: 'un', canonicalFinal: 'uen', audioRepresentative: 'wen1', category: 'nasal-final' },
-  { id: 'vn', displayFinal: 'ün', canonicalFinal: 'ün', audioRepresentative: 'yun1', category: 'nasal-final' },
-  { id: 'ang', displayFinal: 'ang', canonicalFinal: 'ang', audioRepresentative: 'ang1', category: 'nasal-final' },
-  { id: 'eng', displayFinal: 'eng', canonicalFinal: 'eng', audioRepresentative: 'eng1', category: 'nasal-final' },
-  { id: 'ing', displayFinal: 'ing', canonicalFinal: 'ing', audioRepresentative: 'ying1', category: 'nasal-final' },
+  // 特殊韵母
+  { id: 'er', displayFinal: 'er', canonicalFinal: 'er', audioRepresentative: 'er1', category: 'special-final' },
+  // 前鼻韵母
+  { id: 'an', displayFinal: 'an', canonicalFinal: 'an', audioRepresentative: 'an1', category: 'front-nasal-final' },
+  { id: 'en', displayFinal: 'en', canonicalFinal: 'en', audioRepresentative: 'en1', category: 'front-nasal-final' },
+  { id: 'in', displayFinal: 'in', canonicalFinal: 'in', audioRepresentative: 'yin1', category: 'front-nasal-final' },
+  { id: 'uen', displayFinal: 'un', canonicalFinal: 'uen', audioRepresentative: 'wen1', category: 'front-nasal-final' },
+  { id: 'vn', displayFinal: 'ün', canonicalFinal: 'ün', audioRepresentative: 'yun1', category: 'front-nasal-final' },
+  // 后鼻韵母
+  { id: 'ang', displayFinal: 'ang', canonicalFinal: 'ang', audioRepresentative: 'ang1', category: 'back-nasal-final' },
+  { id: 'eng', displayFinal: 'eng', canonicalFinal: 'eng', audioRepresentative: 'eng1', category: 'back-nasal-final' },
+  { id: 'ing', displayFinal: 'ing', canonicalFinal: 'ing', audioRepresentative: 'ying1', category: 'back-nasal-final' },
   // ong 无独立音节录音：用代表音节 hong 播放并高亮 ong
-  { id: 'ong', displayFinal: 'ong', canonicalFinal: 'ong', audioRepresentative: 'hong1', highlightFinal: 'ong', category: 'nasal-final' },
+  { id: 'ong', displayFinal: 'ong', canonicalFinal: 'ong', audioRepresentative: 'hong1', highlightFinal: 'ong', category: 'back-nasal-final' },
 ]
 
 // ── 整体认读音节（16） ──
@@ -115,11 +117,11 @@ const ORDER: OrderRef[] = [
   { kind: 'final', id: 'ao' }, { kind: 'final', id: 'ou' }, { kind: 'final', id: 'iou' },
   { kind: 'final', id: 'ie' }, { kind: 'final', id: 'ue' }, { kind: 'final', id: 'er' },
   { kind: 'whole', id: 'ye' }, { kind: 'whole', id: 'yue' },
-  // 鼻韵母 an en in un ün + 整体认读 yin yun yuan
+  // 前鼻韵母 an en in un ün + 整体认读 yin yun yuan
   { kind: 'final', id: 'an' }, { kind: 'final', id: 'en' }, { kind: 'final', id: 'in' },
   { kind: 'final', id: 'uen' }, { kind: 'final', id: 'vn' },
   { kind: 'whole', id: 'yin' }, { kind: 'whole', id: 'yun' }, { kind: 'whole', id: 'yuan' },
-  // 鼻韵母 ang eng ing ong + 整体认读 ying
+  // 后鼻韵母 ang eng ing ong + 整体认读 ying
   { kind: 'final', id: 'ang' }, { kind: 'final', id: 'eng' }, { kind: 'final', id: 'ing' }, { kind: 'final', id: 'ong' },
   { kind: 'whole', id: 'ying' },
 ]

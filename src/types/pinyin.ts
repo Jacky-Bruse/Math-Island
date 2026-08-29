@@ -2,12 +2,18 @@
 
 export type Tone = 1 | 2 | 3 | 4
 
-// 字母类别：声母 / 单韵母 / 复韵母 / 鼻韵母 / 整体认读音节
-export type LetterCategory =
-  | 'initial'
+// 韵母类别：6 个单韵母 / 8 个复韵母 / er / 5 个前鼻韵母 / 4 个后鼻韵母
+export type FinalCategory =
   | 'single-final'
   | 'compound-final'
-  | 'nasal-final'
+  | 'special-final'
+  | 'front-nasal-final'
+  | 'back-nasal-final'
+
+// 认读类别：声母 / 各类韵母 / 整体认读音节
+export type LetterCategory =
+  | 'initial'
+  | FinalCategory
   | 'whole-syllable'
 
 // 声母
@@ -29,7 +35,7 @@ export interface Final {
   audioRepresentative: string
   // 当代表音是“例音节”而非韵母本音时，高亮的韵母子串，如 'ong'
   highlightFinal?: string
-  category: 'single-final' | 'compound-final' | 'nasal-final'
+  category: FinalCategory
 }
 
 // 整体认读音节
