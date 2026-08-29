@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import PageContainer from '../components/layout/PageContainer'
 import BackButton from '../components/shared/BackButton'
 import LetterCard from '../components/pinyin/LetterCard'
@@ -20,6 +21,11 @@ const ACCENT: Record<LetterCategory, string> = {
 
 const INITIAL_ENTRIES: LetterEntry[] = INITIALS.map(data => ({ kind: 'initial', data }))
 const WHOLE_ENTRIES: LetterEntry[] = WHOLE_SYLLABLES.map(data => ({ kind: 'whole', data }))
+const LETTER_AUDIO_KEYS = [...new Set([
+  ...INITIALS.map(item => item.audioSyllable),
+  ...FINALS.map(item => item.audioRepresentative),
+  ...WHOLE_SYLLABLES.map(item => item.audioKey),
+])]
 
 function entryCategory(entry: LetterEntry): LetterCategory {
   if (entry.kind === 'initial') return 'initial'
@@ -41,8 +47,15 @@ function entryAudioKey(entry: LetterEntry): string {
 
 export default function PinyinLettersPage() {
   const { settings } = useSettings()
-  const { playLetter } = usePinyinAudio(settings.sound)
+  const { playLetter, preloadLetter } = usePinyinAudio(settings.sound)
   const { progress, markLearned } = usePinyinProgress()
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void preloadLetter(LETTER_AUDIO_KEYS)
+    }, 150)
+    return () => window.clearTimeout(timer)
+  }, [preloadLetter])
 
   const handleTap = (entry: LetterEntry) => {
     playLetter(entryAudioKey(entry))

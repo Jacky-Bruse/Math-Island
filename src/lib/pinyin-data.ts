@@ -60,8 +60,7 @@ export const FINALS: Final[] = [
   { id: 'ang', displayFinal: 'ang', canonicalFinal: 'ang', audioRepresentative: 'ang1', category: 'back-nasal-final' },
   { id: 'eng', displayFinal: 'eng', canonicalFinal: 'eng', audioRepresentative: 'eng1', category: 'back-nasal-final' },
   { id: 'ing', displayFinal: 'ing', canonicalFinal: 'ing', audioRepresentative: 'ying1', category: 'back-nasal-final' },
-  // ong 无独立音节录音：用代表音节 hong 播放并高亮 ong
-  { id: 'ong', displayFinal: 'ong', canonicalFinal: 'ong', audioRepresentative: 'hong1', highlightFinal: 'ong', category: 'back-nasal-final' },
+  { id: 'ong', displayFinal: 'ong', canonicalFinal: 'ong', audioRepresentative: 'ong', category: 'back-nasal-final' },
 ]
 
 // ── 整体认读音节（16） ──

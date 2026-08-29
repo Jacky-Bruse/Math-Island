@@ -6,6 +6,7 @@ import type { Tone, Initial, Final } from '../../types/pinyin'
 interface Props {
   onPlay: (audioKey: string) => void
   onBlended: (audioKey: string) => void
+  onPreload: (audioKeys: string[]) => void
 }
 
 const TONES: Tone[] = [1, 2, 3, 4]
@@ -23,7 +24,26 @@ function optionClass(active: boolean): string {
   return `inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-3 font-extrabold transition-[transform,border-color,background-color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pinyin active:scale-95 ${state}`
 }
 
-export default function BlendBuilder({ onPlay, onBlended }: Props) {
+function nextBlendAudioKeys(ini: Initial, fin: Final, tone: Tone): string[] {
+  const keys = new Set<string>()
+
+  for (const nextTone of TONES) {
+    const syllable = toSyllable(ini.id, fin.id, nextTone)
+    if (syllable) keys.add(syllable.audioKey)
+  }
+  for (const nextInitial of BLEND_INITIALS) {
+    const syllable = toSyllable(nextInitial.id, fin.id, tone)
+    if (syllable) keys.add(syllable.audioKey)
+  }
+  for (const nextFinal of BLEND_FINALS) {
+    const syllable = toSyllable(ini.id, nextFinal.id, tone)
+    if (syllable) keys.add(syllable.audioKey)
+  }
+
+  return [...keys]
+}
+
+export default function BlendBuilder({ onPlay, onBlended, onPreload }: Props) {
   const [ini, setIni] = useState<Initial | null>(BLEND_INITIALS[0] ?? null)
   const [fin, setFin] = useState<Final | null>(BLEND_FINALS[0] ?? null)
   const [tone, setTone] = useState<Tone>(1)
@@ -43,6 +63,14 @@ export default function BlendBuilder({ onPlay, onBlended }: Props) {
     // 只在用户改变带调音节后播放和记录；默认展示的 bā 不自动播放。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result?.audioKey])
+
+  useEffect(() => {
+    if (!ini || !fin) return
+    const timer = window.setTimeout(() => {
+      onPreload(nextBlendAudioKeys(ini, fin, tone))
+    }, 150)
+    return () => window.clearTimeout(timer)
+  }, [fin, ini, onPreload, tone])
 
   const selectInitial = (next: Initial) => {
     setIni(next)

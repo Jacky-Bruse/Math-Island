@@ -8,7 +8,7 @@ import { usePinyinProgress } from '../hooks/usePinyinProgress'
 
 export default function PinyinBlendPage() {
   const { settings } = useSettings()
-  const { playBlend } = usePinyinAudio(settings.sound)
+  const { playBlend, preloadBlend } = usePinyinAudio(settings.sound)
   const { markLearned } = usePinyinProgress()
 
   const handleBlended = useCallback((audioKey: string) => {
@@ -23,7 +23,7 @@ export default function PinyinBlendPage() {
           <h1 className="text-2xl font-extrabold text-text">拼读</h1>
         </div>
 
-        <BlendBuilder onPlay={playBlend} onBlended={handleBlended} />
+        <BlendBuilder onPlay={playBlend} onBlended={handleBlended} onPreload={preloadBlend} />
       </div>
     </PageContainer>
   )

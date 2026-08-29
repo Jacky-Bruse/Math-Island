@@ -68,9 +68,10 @@ check('其余 Yabla 音频均已复制且非空', () => {
 })
 check('旧版认字母音频已完整备份', () => {
   for (const key of letterAudioKeys) {
-    const relative = davOverride.has(key)
-      ? path.join('dav', `${key}.mp3`)
-      : path.join('syllabs', `cmn-${key}.mp3`)
+    const originalKey = key === 'ong' ? 'hong1' : key
+    const relative = davOverride.has(originalKey)
+      ? path.join('dav', `${originalKey}.mp3`)
+      : path.join('syllabs', `cmn-${originalKey}.mp3`)
     const original = path.resolve('public/audio/cmn', relative)
     const backup = path.resolve('bak/pinyin-audio', relative)
     assert.ok(existsSync(backup), `缺少备份：${relative}`)
