@@ -9,6 +9,7 @@ export function usePinyinAudio(soundOn: boolean) {
   const cacheRef = useRef<Map<string, string>>(new Map()) // 源 url → objectURL
   const pendingRef = useRef<Map<string, Promise<string | null>>>(new Map())
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const finishRef = useRef<((completed: boolean) => void) | null>(null)
   const soundRef = useRef(soundOn)
   const playTokenRef = useRef(0) // 新的播放会让旧的异步加载失效
   const aliveRef = useRef(true) // 组件是否仍挂载（避免卸载后 fetch 完成创建悬挂 objectURL）
@@ -19,12 +20,15 @@ export function usePinyinAudio(soundOn: boolean) {
 
   const stop = useCallback(() => {
     playTokenRef.current++
+    const finish = finishRef.current
+    finishRef.current = null
     if (audioRef.current) {
       audioRef.current.onended = null
       audioRef.current.onerror = null
       audioRef.current.pause()
       audioRef.current = null
     }
+    finish?.(false)
   }, [])
 
   const resolve = useCallback((url: string): Promise<string | null> => {
@@ -65,24 +69,44 @@ export function usePinyinAudio(soundOn: boolean) {
     }
   }, [resolve])
 
-  const playUrl = useCallback(async (url: string): Promise<void> => {
-    if (!soundRef.current) return
+  const playUrls = useCallback(async (urls: string[]): Promise<void> => {
     stop()
+    if (!soundRef.current || urls.length === 0) return
     const token = playTokenRef.current
-    const obj = await resolve(url)
-    if (!obj || !soundRef.current || token !== playTokenRef.current) return
-    const audio = new Audio(obj)
-    audioRef.current = audio
-    try {
-      await audio.play()
-    } catch {
-      // 自动播放被拦截等，忽略
+    for (const url of urls) {
+      const obj = await resolve(url)
+      if (!obj || !soundRef.current || token !== playTokenRef.current) return
+
+      const audio = new Audio(obj)
+      audioRef.current = audio
+      const completed = await new Promise<boolean>(done => {
+        let settled = false
+        const finish = (didComplete: boolean) => {
+          if (settled) return
+          settled = true
+          if (finishRef.current === finish) finishRef.current = null
+          if (audioRef.current === audio) audioRef.current = null
+          audio.onended = null
+          audio.onerror = null
+          done(didComplete)
+        }
+        finishRef.current = finish
+        audio.onended = () => finish(true)
+        audio.onerror = () => finish(false)
+        void audio.play().catch(() => finish(false))
+      })
+      if (!completed || !soundRef.current || token !== playTokenRef.current) return
     }
   }, [resolve, stop])
 
+  const playUrl = useCallback((url: string) => playUrls([url]), [playUrls])
+
   const playSyllab = useCallback((audioKey: string) => playUrl(syllabUrl(audioKey)), [playUrl])
   const playLetter = useCallback((audioKey: string) => playUrl(letterUrl(audioKey)), [playUrl])
-  const playBlend = useCallback((audioKey: string) => playUrl(blendUrl(audioKey)), [playUrl])
+  const playBlendSequence = useCallback(
+    (audioKeys: string[]) => playUrls(audioKeys.map(blendUrl)),
+    [playUrls],
+  )
   const playHanzi = useCallback((hanzi: string) => playUrl(hanziUrl(hanzi)), [playUrl])
   const preloadLetter = useCallback(
     (audioKeys: string[]) => soundOn ? preloadUrls(audioKeys.map(letterUrl)) : Promise.resolve(),
@@ -96,6 +120,7 @@ export function usePinyinAudio(soundOn: boolean) {
   useEffect(() => {
     const cache = cacheRef.current
     const pending = pendingRef.current
+    const finish = finishRef
     aliveRef.current = true
     return () => {
       aliveRef.current = false
@@ -108,11 +133,14 @@ export function usePinyinAudio(soundOn: boolean) {
         audioRef.current.pause()
         audioRef.current = null
       }
+      const complete = finish.current
+      finish.current = null
+      complete?.(false)
       for (const obj of cache.values()) URL.revokeObjectURL(obj)
       cache.clear()
       pending.clear()
     }
   }, [])
 
-  return { playSyllab, playLetter, playBlend, playHanzi, preloadLetter, preloadBlend }
+  return { playSyllab, playLetter, playBlendSequence, playHanzi, preloadLetter, preloadBlend }
 }

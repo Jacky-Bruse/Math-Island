@@ -31,7 +31,7 @@ export interface Final {
   id: string // 稳定 id，用 canonical 形，如 'uei'、'ang'
   displayFinal: string // 孩子看到的形，如 'ui'
   canonicalFinal: string // 拼读内部形，如 'uei'
-  // 代表音音频 stem（已 ü→v 归一），如 a→'a1'、ui→'wei1'、ong→'hong1'
+  // 代表音音频 stem（已 ü→v 归一），如 a→'a1'、ui→'wei1'、ong→'ong'
   audioRepresentative: string
   // 当代表音是“例音节”而非韵母本音时，高亮的韵母子串，如 'ong'
   highlightFinal?: string

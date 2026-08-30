@@ -57,6 +57,22 @@ export function toSyllable(initialId: string, finalId: string, tone: Tone): Syll
   }
 }
 
+/** 韵母在指定声调下的代表音频键，如 a→a2、ui→wei3、ong→ong4。 */
+export function finalToneAudioKey(finalId: string, tone: Tone): string | null {
+  const fin = getFinalById(finalId)
+  if (!fin) return null
+  return `${fin.audioRepresentative.replace(/\d$/, '')}${tone}`
+}
+
+/** 合法组合的“声母 → 带调韵母 → 完整音节”三段音频键；非法组合返回空数组。 */
+export function spellingAudioKeys(initialId: string, finalId: string, tone: Tone): string[] {
+  const ini = getInitialById(initialId)
+  const finalKey = finalToneAudioKey(finalId, tone)
+  const syllable = toSyllable(initialId, finalId, tone)
+  if (!ini || !finalKey || !syllable) return []
+  return [ini.audioSyllable, finalKey, syllable.audioKey]
+}
+
 export function isValidBase(base: string): boolean {
   return validBases.has(base)
 }

@@ -6,7 +6,7 @@ import path from 'node:path'
 import { blendBase, applyToneMark, toAudioKey } from '../src/lib/pinyin-orthography'
 import { BLEND_FINALS, BLEND_INITIALS, FINALS, INITIALS, WHOLE_SYLLABLES } from '../src/lib/pinyin-data'
 import { DAV_OVERRIDE_KEYS, YABLA_LETTER_FALLBACK_KEYS } from '../src/lib/pinyin-audio-overrides'
-import { blendBaseFor, isValidBlend, toSyllable, availableTones } from '../src/lib/pinyin-syllables'
+import { availableTones, blendBaseFor, finalToneAudioKey, isValidBlend, spellingAudioKeys, toSyllable } from '../src/lib/pinyin-syllables'
 import type { Tone } from '../src/types/pinyin'
 
 let passed = 0
@@ -57,7 +57,7 @@ const letterAudioKeys = [...new Set([
 const yablaFallback = new Set(YABLA_LETTER_FALLBACK_KEYS)
 const davOverride = new Set(DAV_OVERRIDE_KEYS)
 check('63 张卡片共用 46 个音频键', () => assert.equal(letterAudioKeys.length, 46))
-check('Yabla 缺失项仅 ei1', () => assert.deepEqual([...yablaFallback], ['ei1']))
+check('认字母仅 ei1 使用旧版回退', () => assert.deepEqual([...yablaFallback], ['ei1']))
 check('其余 Yabla 音频均已复制且非空', () => {
   const missing = letterAudioKeys.filter(key => {
     if (yablaFallback.has(key)) return false
@@ -107,6 +107,32 @@ check('toSyllable(g,uei,1)', () => {
   assert.deepEqual(toSyllable('g', 'uei', 1), { display: 'guī', audioKey: 'gui1', base: 'gui', tone: 1 })
 })
 check('toSyllable(b,e,1) 非法→null', () => assert.equal(toSyllable('b', 'e', 1), null))
+
+console.log('三段带调拼读音频')
+check('b + a + 二声 → bo1 / a2 / ba2', () => {
+  assert.deepEqual(spellingAudioKeys('b', 'a', 2), ['bo1', 'a2', 'ba2'])
+})
+check('g + ui + 三声 → ge1 / wei3 / gui3', () => {
+  assert.deepEqual(spellingAudioKeys('g', 'uei', 3), ['ge1', 'wei3', 'gui3'])
+})
+check('d + ong + 四声 → de1 / ong4 / dong4', () => {
+  assert.deepEqual(spellingAudioKeys('d', 'ong', 4), ['de1', 'ong4', 'dong4'])
+})
+check('无效组合不生成任何播放键', () => assert.deepEqual(spellingAudioKeys('b', 'e', 1), []))
+const finalToneAudioKeys = FINALS.flatMap(final =>
+  ([1, 2, 3, 4] as Tone[]).map(itemTone => finalToneAudioKey(final.id, itemTone)),
+)
+check('24 个韵母的 96 个带调音频均已导入且非空', () => {
+  assert.equal(new Set(finalToneAudioKeys).size, 96)
+  const missing = finalToneAudioKeys.filter(key => {
+    if (!key) return true
+    const source = path.resolve('docs/yabla_mp3', `${key}.mp3`)
+    const served = path.resolve('public/audio/cmn/yabla', `${key}.mp3`)
+    return !existsSync(source) || statSync(source).size === 0
+      || !existsSync(served) || statSync(served).size === 0
+  })
+  assert.deepEqual(missing, [])
+})
 
 console.log('整体认读 -i 可拼读（四声练习） / 声调可用性')
 check('zh + i 可拼读（zhi）', () => assert.equal(isValidBlend('zh', 'i'), true))

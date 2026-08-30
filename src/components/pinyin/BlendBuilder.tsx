@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { BLEND_INITIALS, BLEND_FINALS } from '../../lib/pinyin-data'
-import { isValidBlend, toSyllable } from '../../lib/pinyin-syllables'
+import { isValidBlend, spellingAudioKeys, toSyllable } from '../../lib/pinyin-syllables'
 import type { Tone, Initial, Final } from '../../types/pinyin'
 
 interface Props {
-  onPlay: (audioKey: string) => void
+  onSpell: (audioKeys: string[]) => void
   onBlended: (audioKey: string) => void
   onPreload: (audioKeys: string[]) => void
 }
@@ -26,41 +26,42 @@ function optionClass(active: boolean): string {
 
 function nextBlendAudioKeys(ini: Initial, fin: Final, tone: Tone): string[] {
   const keys = new Set<string>()
+  const add = (initialId: string, finalId: string, nextTone: Tone) => {
+    for (const key of spellingAudioKeys(initialId, finalId, nextTone)) keys.add(key)
+  }
 
   for (const nextTone of TONES) {
-    const syllable = toSyllable(ini.id, fin.id, nextTone)
-    if (syllable) keys.add(syllable.audioKey)
+    add(ini.id, fin.id, nextTone)
   }
   for (const nextInitial of BLEND_INITIALS) {
-    const syllable = toSyllable(nextInitial.id, fin.id, tone)
-    if (syllable) keys.add(syllable.audioKey)
+    add(nextInitial.id, fin.id, tone)
   }
   for (const nextFinal of BLEND_FINALS) {
-    const syllable = toSyllable(ini.id, nextFinal.id, tone)
-    if (syllable) keys.add(syllable.audioKey)
+    add(ini.id, nextFinal.id, tone)
   }
 
   return [...keys]
 }
 
-export default function BlendBuilder({ onPlay, onBlended, onPreload }: Props) {
+export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
   const [ini, setIni] = useState<Initial | null>(BLEND_INITIALS[0] ?? null)
   const [fin, setFin] = useState<Final | null>(BLEND_FINALS[0] ?? null)
   const [tone, setTone] = useState<Tone>(1)
-  const mountedRef = useRef(false)
 
   const result = ini && fin ? toSyllable(ini.id, fin.id, tone) : null
+  const previousAudioKeyRef = useRef(result?.audioKey)
+  const spellingKeys = ini && fin ? spellingAudioKeys(ini.id, fin.id, tone) : []
 
   useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true
-      return
-    }
+    if (previousAudioKeyRef.current === result?.audioKey) return
+    previousAudioKeyRef.current = result?.audioKey
     if (result) {
-      onPlay(result.audioKey)
+      onSpell(spellingKeys)
       onBlended(result.audioKey)
+    } else {
+      onSpell([])
     }
-    // 只在用户改变带调音节后播放和记录；默认展示的 bā 不自动播放。
+    // 只在带调音节确实变化后播放和记录；默认展示的 bā 不自动播放（含 StrictMode）。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result?.audioKey])
 
@@ -96,10 +97,10 @@ export default function BlendBuilder({ onPlay, onBlended, onPreload }: Props) {
         {result && (
           <button
             type="button"
-            onClick={() => onPlay(result.audioKey)}
+            onClick={() => onSpell(spellingKeys)}
             className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-pinyin px-5 text-sm font-bold text-white shadow-sm transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pinyin active:scale-95"
           >
-            ▶ 再听一次
+            ▶ 再拼一次
           </button>
         )}
       </section>
