@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { BLEND_INITIALS, BLEND_FINALS } from '../../lib/pinyin-data'
-import { isValidBlend, spellingAudioKeys, toSyllable } from '../../lib/pinyin-syllables'
+import { isValidBlend, isWholeSyllableBase, spellingAudioKeys, toSyllable } from '../../lib/pinyin-syllables'
 import type { Tone, Initial, Final } from '../../types/pinyin'
 
 interface Props {
@@ -51,6 +51,7 @@ export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
   const result = ini && fin ? toSyllable(ini.id, fin.id, tone) : null
   const previousAudioKeyRef = useRef(result?.audioKey)
   const spellingKeys = ini && fin ? spellingAudioKeys(ini.id, fin.id, tone) : []
+  const isWholeSyllable = result ? isWholeSyllableBase(result.base) : false
 
   useEffect(() => {
     if (previousAudioKeyRef.current === result?.audioKey) return
@@ -94,13 +95,14 @@ export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
         <div className={`${result ? 'text-5xl text-pinyin' : `text-xl ${invalidPair ? 'text-danger' : 'text-pinyin'}`} font-extrabold`}>
           {result?.display ?? (invalidPair ? '不能拼读，换一个试试' : emptyLabel)}
         </div>
+        {isWholeSyllable && <div className="mt-2 text-sm font-bold text-text-secondary">整体认读音节</div>}
         {result && (
           <button
             type="button"
             onClick={() => onSpell(spellingKeys)}
             className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-pinyin px-5 text-sm font-bold text-white shadow-sm transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pinyin active:scale-95"
           >
-            ▶ 再拼一次
+            ▶ {isWholeSyllable ? '再读一次' : '再拼一次'}
           </button>
         )}
       </section>

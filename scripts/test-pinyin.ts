@@ -118,6 +118,13 @@ check('g + ui + 三声 → ge1 / wei3 / gui3', () => {
 check('d + ong + 四声 → de1 / ong4 / dong4', () => {
   assert.deepEqual(spellingAudioKeys('d', 'ong', 4), ['de1', 'ong4', 'dong4'])
 })
+check('整体认读音节直接读完整音节', () => {
+  const wholeInitials = ['zh', 'ch', 'sh', 'r', 'z', 'c', 's']
+  assert.deepEqual(
+    wholeInitials.map(initial => spellingAudioKeys(initial, 'i', 3)),
+    [['zhi3'], ['chi3'], ['shi3'], ['ri3'], ['zi3'], ['ci3'], ['si3']],
+  )
+})
 check('无效组合不生成任何播放键', () => assert.deepEqual(spellingAudioKeys('b', 'e', 1), []))
 const finalToneAudioKeys = FINALS.flatMap(final =>
   ([1, 2, 3, 4] as Tone[]).map(itemTone => finalToneAudioKey(final.id, itemTone)),
@@ -134,10 +141,10 @@ check('24 个韵母的 96 个带调音频均已导入且非空', () => {
   assert.deepEqual(missing, [])
 })
 
-console.log('整体认读 -i 可拼读（四声练习） / 声调可用性')
-check('zh + i 可拼读（zhi）', () => assert.equal(isValidBlend('zh', 'i'), true))
-check('z + i 可拼读（zi）', () => assert.equal(isValidBlend('z', 'i'), true))
-check('r + i 可拼读（ri）', () => assert.equal(isValidBlend('r', 'i'), true))
+console.log('整体认读 -i 可选择并直接认读（四声练习） / 声调可用性')
+check('zh + i 可选择（zhi）', () => assert.equal(isValidBlend('zh', 'i'), true))
+check('z + i 可选择（zi）', () => assert.equal(isValidBlend('z', 'i'), true))
+check('r + i 可选择（ri）', () => assert.equal(isValidBlend('r', 'i'), true))
 check('zh + i 四声齐全', () => assert.deepEqual(availableTones('zh', 'i'), [1, 2, 3, 4]))
 check('toSyllable(sh,i,1) → shī', () => {
   assert.deepEqual(toSyllable('sh', 'i', 1), { display: 'shī', audioKey: 'shi1', base: 'shi', tone: 1 })

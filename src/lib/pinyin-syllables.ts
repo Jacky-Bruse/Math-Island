@@ -2,14 +2,13 @@
 // generated 表的 base 键作为已确认的课程范围；四声音频完整性由测试在发布前校验。
 
 import { blendBase, applyToneMark, toAudioKey } from './pinyin-orthography'
-import { getInitialById, getFinalById } from './pinyin-data'
+import { getInitialById, getFinalById, WHOLE_SYLLABLES } from './pinyin-data'
 import { VALID_BLEND_SYLLABLES } from './pinyin-syllables.generated'
 import type { SyllableResult, Tone } from '../types/pinyin'
 
 // 剔除不适合一年级拼读的 base：
 // - audio-cmn 收录的方言/语气/罕见音节（fe/lo/cei/tei/kei/nun…），普通话拼读教学不出现。
-// 注：整体认读音节（zhi/chi/shi/ri/zi/ci/si）虽按统编版整体认读，但四声均需练习，
-//     故保留在拼读器中可作普通音节拼读（四声音频齐全）。
+// 注：整体认读音节（zhi/chi/shi/ri/zi/ci/si）保留在拼读器中练习四声，但直接整体朗读。
 const DENYLIST = new Set<string>([
   'fe', 'lo', 'cei', 'tei', 'kei', 'nun', 'nou',
 ])
@@ -18,6 +17,7 @@ const TONES: Tone[] = [1, 2, 3, 4]
 const validBases = new Set(
   Object.keys(VALID_BLEND_SYLLABLES).filter(base => !DENYLIST.has(base)),
 )
+const wholeSyllableBases = new Set(WHOLE_SYLLABLES.map(item => item.syllable))
 
 // j/q/x 后写作 u、un 的音实际属于 ü、ün；只允许孩子从 ü、ün 入口选择。
 function isDuplicateJqxPath(initialId: string, finalId: string): boolean {
@@ -64,12 +64,17 @@ export function finalToneAudioKey(finalId: string, tone: Tone): string | null {
   return `${fin.audioRepresentative.replace(/\d$/, '')}${tone}`
 }
 
-/** 合法组合的“声母 → 带调韵母 → 完整音节”三段音频键；非法组合返回空数组。 */
+export function isWholeSyllableBase(base: string): boolean {
+  return wholeSyllableBases.has(base)
+}
+
+/** 普通音节返回三段音频键；整体认读音节只返回完整读音；非法组合返回空数组。 */
 export function spellingAudioKeys(initialId: string, finalId: string, tone: Tone): string[] {
   const ini = getInitialById(initialId)
   const finalKey = finalToneAudioKey(finalId, tone)
   const syllable = toSyllable(initialId, finalId, tone)
   if (!ini || !finalKey || !syllable) return []
+  if (isWholeSyllableBase(syllable.base)) return [syllable.audioKey]
   return [ini.audioSyllable, finalKey, syllable.audioKey]
 }
 
