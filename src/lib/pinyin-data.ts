@@ -1,7 +1,7 @@
 // 拼音课程静态数据（纯数据，查询/出题在 pinyin-practice.ts，拼读合法性在 pinyin-syllables.ts）
 // 顺序依统编版一年级上册：单韵母 → 声母分组 → 复韵母/鼻韵母，整体认读音节穿插。
 
-import type { Initial, Final, WholeSyllable, LetterEntry, ExampleWord } from '../types/pinyin'
+import type { Initial, Final, TripleFinal, WholeSyllable, LetterEntry, ExampleWord } from '../types/pinyin'
 
 // ── 声母（23）。audioSyllable 为呼读音音频 stem；y/w 不参与拼读 ──
 export const INITIALS: Initial[] = [
@@ -83,8 +83,23 @@ export const WHOLE_SYLLABLES: WholeSyllable[] = [
   { id: 'ying', syllable: 'ying', audioKey: 'ying1' },
 ]
 
+// ── 三拼组合（仅用于拼读页）──
+export const TRIPLE_FINALS: TripleFinal[] = [
+  { id: 'ian', displayFinal: 'ian', canonicalFinal: 'ian', audioRepresentative: 'an1', category: 'compound-final', medialId: 'i', validInitialIds: ['b', 'p', 'm', 'd', 't', 'n', 'l', 'j', 'q', 'x'] },
+  { id: 'iao', displayFinal: 'iao', canonicalFinal: 'iao', audioRepresentative: 'ao1', category: 'compound-final', medialId: 'i', validInitialIds: ['b', 'p', 'm', 'd', 't', 'n', 'l', 'j', 'q', 'x'] },
+  { id: 'iang', displayFinal: 'iang', canonicalFinal: 'iang', audioRepresentative: 'ang1', category: 'compound-final', medialId: 'i', validInitialIds: ['n', 'l', 'j', 'q', 'x'] },
+  { id: 'iong', displayFinal: 'iong', canonicalFinal: 'iong', audioRepresentative: 'ong', category: 'compound-final', medialId: 'i', validInitialIds: ['j', 'q', 'x'] },
+  { id: 'ua', displayFinal: 'ua', canonicalFinal: 'ua', audioRepresentative: 'a1', category: 'compound-final', medialId: 'u', validInitialIds: ['g', 'k', 'h', 'zh', 'ch', 'sh'] },
+  { id: 'uo', displayFinal: 'uo', canonicalFinal: 'uo', audioRepresentative: 'o1', category: 'compound-final', medialId: 'u', validInitialIds: ['d', 't', 'n', 'l', 'g', 'k', 'h', 'zh', 'ch', 'sh', 'r', 'z', 'c', 's'] },
+  { id: 'uai', displayFinal: 'uai', canonicalFinal: 'uai', audioRepresentative: 'ai1', category: 'compound-final', medialId: 'u', validInitialIds: ['g', 'k', 'h', 'zh', 'ch', 'sh'] },
+  { id: 'uan', displayFinal: 'uan', canonicalFinal: 'uan', audioRepresentative: 'an1', category: 'compound-final', medialId: 'u', validInitialIds: ['d', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'zh', 'ch', 'sh', 'r', 'z', 'c', 's'] },
+  { id: 'uang', displayFinal: 'uang', canonicalFinal: 'uang', audioRepresentative: 'ang1', category: 'compound-final', medialId: 'u', validInitialIds: ['g', 'k', 'h', 'zh', 'ch', 'sh'] },
+  { id: 'ia', displayFinal: 'ia', canonicalFinal: 'ia', audioRepresentative: 'a1', category: 'compound-final', medialId: 'i', validInitialIds: ['l', 'j', 'q', 'x'] },
+]
+
 const initialById = new Map(INITIALS.map(i => [i.id, i]))
-const finalById = new Map(FINALS.map(f => [f.id, f]))
+const finalById = new Map([...FINALS, ...TRIPLE_FINALS].map(f => [f.id, f]))
+const tripleFinalById = new Map(TRIPLE_FINALS.map(f => [f.id, f]))
 const wholeById = new Map(WHOLE_SYLLABLES.map(w => [w.id, w]))
 
 // ── 学习线性顺序（统编版；whole 穿插）。以 id 引用，构造 LetterEntry[] ──
@@ -149,6 +164,7 @@ export function letterEntryId(entry: LetterEntry): string {
 // BlendBuilder 可选声母（canBlend）/ 可选韵母（排除 er，er 不与声母相拼）
 export const BLEND_INITIALS: Initial[] = INITIALS.filter(i => i.canBlend)
 export const BLEND_FINALS: Final[] = FINALS.filter(f => f.id !== 'er')
+export const ALL_BLEND_FINALS: Final[] = [...BLEND_FINALS, ...TRIPLE_FINALS]
 
 // ── 例字白名单（“汉字练习”阶段；均为单字、避开多音字，音频取 cmn-{hanzi}.mp3）──
 // 注：每个汉字的 cmn-{hanzi}.mp3 存在性由 fetch-pinyin-audio 脚本校验。
@@ -188,4 +204,7 @@ export function getInitialById(id: string): Initial | undefined {
 }
 export function getFinalById(id: string): Final | undefined {
   return finalById.get(id)
+}
+export function getTripleFinalById(id: string): TripleFinal | undefined {
+  return tripleFinalById.get(id)
 }

@@ -2,7 +2,7 @@
 // generated 表的 base 键作为已确认的课程范围；四声音频完整性由测试在发布前校验。
 
 import { blendBase, applyToneMark, toAudioKey } from './pinyin-orthography'
-import { getInitialById, getFinalById, WHOLE_SYLLABLES } from './pinyin-data'
+import { getInitialById, getFinalById, getTripleFinalById, TRIPLE_FINALS, WHOLE_SYLLABLES } from './pinyin-data'
 import { VALID_BLEND_SYLLABLES } from './pinyin-syllables.generated'
 import type { SyllableResult, Tone } from '../types/pinyin'
 
@@ -18,6 +18,9 @@ const validBases = new Set(
   Object.keys(VALID_BLEND_SYLLABLES).filter(base => !DENYLIST.has(base)),
 )
 const wholeSyllableBases = new Set(WHOLE_SYLLABLES.map(item => item.syllable))
+const tripleSyllableBases = new Set(
+  TRIPLE_FINALS.flatMap(fin => fin.validInitialIds.map(initialId => blendBase(initialId, fin.canonicalFinal))),
+)
 
 // j/q/x 后写作 u、un 的音实际属于 ü、ün；只允许孩子从 ü、ün 入口选择。
 function isDuplicateJqxPath(initialId: string, finalId: string): boolean {
@@ -34,6 +37,8 @@ export function blendBaseFor(initialId: string, finalId: string): string | null 
 
 /** “声母+韵母”是否属于本课程目标音节范围。 */
 export function isValidBlend(initialId: string, finalId: string): boolean {
+  const tripleFinal = getTripleFinalById(finalId)
+  if (tripleFinal) return tripleFinal.validInitialIds.includes(initialId)
   if (isDuplicateJqxPath(initialId, finalId)) return false
   const base = blendBaseFor(initialId, finalId)
   return base != null && validBases.has(base)
@@ -75,9 +80,15 @@ export function spellingAudioKeys(initialId: string, finalId: string, tone: Tone
   const syllable = toSyllable(initialId, finalId, tone)
   if (!ini || !finalKey || !syllable) return []
   if (isWholeSyllableBase(syllable.base)) return [syllable.audioKey]
+  const tripleFinal = getTripleFinalById(finalId)
+  if (tripleFinal) {
+    const medialId = finalId === 'uan' && ['j', 'q', 'x'].includes(initialId) ? 'v' : tripleFinal.medialId
+    const medialKey = getFinalById(medialId)?.audioRepresentative
+    return medialKey ? [ini.audioSyllable, medialKey, finalKey, syllable.audioKey] : []
+  }
   return [ini.audioSyllable, finalKey, syllable.audioKey]
 }
 
 export function isValidBase(base: string): boolean {
-  return validBases.has(base)
+  return validBases.has(base) || tripleSyllableBases.has(base)
 }

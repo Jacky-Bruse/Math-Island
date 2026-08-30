@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { BLEND_INITIALS, BLEND_FINALS } from '../../lib/pinyin-data'
+import { ALL_BLEND_FINALS, BLEND_INITIALS, BLEND_FINALS, TRIPLE_FINALS } from '../../lib/pinyin-data'
 import { isValidBlend, isWholeSyllableBase, spellingAudioKeys, toSyllable } from '../../lib/pinyin-syllables'
 import type { Tone, Initial, Final } from '../../types/pinyin'
 
@@ -36,7 +36,7 @@ function nextBlendAudioKeys(ini: Initial, fin: Final, tone: Tone): string[] {
   for (const nextInitial of BLEND_INITIALS) {
     add(nextInitial.id, fin.id, tone)
   }
-  for (const nextFinal of BLEND_FINALS) {
+  for (const nextFinal of ALL_BLEND_FINALS) {
     add(ini.id, nextFinal.id, tone)
   }
 
@@ -128,6 +128,19 @@ export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
         <h2 id="blend-final-title" className="mb-2 text-sm font-bold text-text-secondary">韵母</h2>
         <div className="flex flex-wrap gap-2">
           {BLEND_FINALS.map(item => (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => selectFinal(item)}
+              aria-pressed={fin?.id === item.id}
+              className={`${optionClass(fin?.id === item.id)} text-base`}
+            >
+              {item.displayFinal}
+            </button>
+          ))}
+        </div>
+        <div aria-label="三拼组合" className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+          {TRIPLE_FINALS.map(item => (
             <button
               type="button"
               key={item.id}

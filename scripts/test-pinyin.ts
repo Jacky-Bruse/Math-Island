@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { blendBase, applyToneMark, toAudioKey } from '../src/lib/pinyin-orthography'
-import { BLEND_FINALS, BLEND_INITIALS, FINALS, INITIALS, WHOLE_SYLLABLES } from '../src/lib/pinyin-data'
+import { BLEND_FINALS, BLEND_INITIALS, FINALS, INITIALS, TRIPLE_FINALS, WHOLE_SYLLABLES } from '../src/lib/pinyin-data'
 import { DAV_OVERRIDE_KEYS, YABLA_LETTER_FALLBACK_KEYS } from '../src/lib/pinyin-audio-overrides'
 import { availableTones, blendBaseFor, finalToneAudioKey, isValidBlend, spellingAudioKeys, toSyllable } from '../src/lib/pinyin-syllables'
 import type { Tone } from '../src/types/pinyin'
@@ -31,6 +31,7 @@ console.log('认字母分类')
 check('声母 23 个', () => assert.equal(INITIALS.length, 23))
 check('韵母 24 个', () => assert.equal(FINALS.length, 24))
 check('整体认读音节 16 个', () => assert.equal(WHOLE_SYLLABLES.length, 16))
+check('三拼组合 10 个', () => assert.deepEqual(TRIPLE_FINALS.map(item => item.id), ['ian', 'iao', 'iang', 'iong', 'ua', 'uo', 'uai', 'uan', 'uang', 'ia']))
 check('韵母分类数量正确', () => {
   assert.deepEqual(
     Object.fromEntries(
@@ -108,7 +109,7 @@ check('toSyllable(g,uei,1)', () => {
 })
 check('toSyllable(b,e,1) 非法→null', () => assert.equal(toSyllable('b', 'e', 1), null))
 
-console.log('三段带调拼读音频')
+console.log('带调拼读音频')
 check('b + a + 二声 → bo1 / a2 / ba2', () => {
   assert.deepEqual(spellingAudioKeys('b', 'a', 2), ['bo1', 'a2', 'ba2'])
 })
@@ -117,6 +118,12 @@ check('g + ui + 三声 → ge1 / wei3 / gui3', () => {
 })
 check('d + ong + 四声 → de1 / ong4 / dong4', () => {
   assert.deepEqual(spellingAudioKeys('d', 'ong', 4), ['de1', 'ong4', 'dong4'])
+})
+check('p + i + an + 二声 → po1 / yi1 / an2 / pian2', () => {
+  assert.deepEqual(spellingAudioKeys('p', 'ian', 2), ['po1', 'yi1', 'an2', 'pian2'])
+})
+check('j + ü + an + 三声 → ji1 / yu1 / an3 / juan3', () => {
+  assert.deepEqual(spellingAudioKeys('j', 'uan', 3), ['ji1', 'yu1', 'an3', 'juan3'])
 })
 check('整体认读音节直接读完整音节', () => {
   const wholeInitials = ['zh', 'ch', 'sh', 'r', 'z', 'c', 's']
@@ -155,7 +162,7 @@ check('toSyllable(j,ü,4) → jù', () => {
   assert.deepEqual(toSyllable('j', 'v', 4), { display: 'jù', audioKey: 'ju4', base: 'ju', tone: 4 })
 })
 
-console.log('拼读课程矩阵 / Yabla 音频')
+console.log('两拼课程矩阵 / Yabla 音频')
 const validBlendPairs = BLEND_INITIALS.flatMap(initial =>
   BLEND_FINALS
     .filter(final => isValidBlend(initial.id, final.id))
@@ -169,7 +176,7 @@ const blendAudioKeys = validBlendPairs.flatMap(({ initial, final }) =>
     return syllable.audioKey
   }),
 )
-check('课程包含 288 个唯一声韵组合', () => assert.equal(validBlendPairs.length, 288))
+check('两拼课程包含 288 个唯一声韵组合', () => assert.equal(validBlendPairs.length, 288))
 check('288 个组合不会生成重复音节', () => assert.equal(validBlendBases.size, 288))
 check('j/q/x 只从 ü、ün 入口拼读', () => {
   for (const initial of ['j', 'q', 'x']) {
@@ -184,6 +191,35 @@ check('拼读所需 1152 个 Yabla 音频均存在且非空', () => {
   const missing = blendAudioKeys.filter(key => {
     const file = path.resolve('public/audio/cmn/yabla', `${key}.mp3`)
     return !existsSync(file) || statSync(file).size === 0
+  })
+  assert.deepEqual(missing, [])
+})
+
+console.log('三拼课程矩阵 / Yabla 音频')
+const tripleBlendPairs = BLEND_INITIALS.flatMap(initial =>
+  TRIPLE_FINALS
+    .filter(final => isValidBlend(initial.id, final.id))
+    .map(final => ({ initial, final, base: blendBaseFor(initial.id, final.id) })),
+)
+check('三拼课程包含 81 个唯一组合', () => {
+  assert.equal(tripleBlendPairs.length, 81)
+  assert.equal(new Set(tripleBlendPairs.map(item => item.base)).size, 81)
+})
+check('rua 与缺少四声音频的 dia 不进入课程', () => {
+  assert.equal(isValidBlend('r', 'ua'), false)
+  assert.equal(isValidBlend('d', 'ia'), false)
+})
+check('三拼所需 324 个完整 Yabla 音频均存在且非空', () => {
+  const keys = tripleBlendPairs.flatMap(({ initial, final }) =>
+    ([1, 2, 3, 4] as Tone[]).map(itemTone => toSyllable(initial.id, final.id, itemTone)?.audioKey),
+  )
+  assert.equal(new Set(keys).size, 324)
+  const missing = keys.filter(key => {
+    if (!key) return true
+    const source = path.resolve('docs/yabla_mp3', `${key}.mp3`)
+    const served = path.resolve('public/audio/cmn/yabla', `${key}.mp3`)
+    return !existsSync(source) || statSync(source).size === 0
+      || !existsSync(served) || statSync(served).size === 0
   })
   assert.deepEqual(missing, [])
 })

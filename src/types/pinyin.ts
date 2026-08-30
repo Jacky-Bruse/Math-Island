@@ -38,6 +38,12 @@ export interface Final {
   category: FinalCategory
 }
 
+// 三拼组合仍显示在“韵母”区域，但播放时拆为介母 + 基础韵母。
+export interface TripleFinal extends Final {
+  medialId: 'i' | 'u'
+  validInitialIds: readonly string[]
+}
+
 // 整体认读音节
 export interface WholeSyllable {
   id: string // 'zhi'
