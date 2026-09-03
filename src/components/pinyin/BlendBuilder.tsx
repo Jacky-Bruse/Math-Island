@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ALL_BLEND_FINALS, BLEND_INITIALS, BLEND_FINALS, TRIPLE_FINALS } from '../../lib/pinyin-data'
-import { isValidBlend, isWholeSyllableBase, spellingAudioKeys, toSyllable } from '../../lib/pinyin-syllables'
+import { blendBaseFor, isValidBlend, isWholeSyllableBase, spellingAudioKeys, toSyllable } from '../../lib/pinyin-syllables'
 import type { Tone, Initial, Final } from '../../types/pinyin'
 
 interface Props {
@@ -24,7 +24,7 @@ function optionClass(active: boolean): string {
   return `inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-3 font-extrabold transition-[transform,border-color,background-color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pinyin active:scale-95 ${state}`
 }
 
-function nextBlendAudioKeys(ini: Initial, fin: Final, tone: Tone): string[] {
+function nextBlendAudioKeys(ini: Initial, fin: Final, tone: Tone | null): string[] {
   const keys = new Set<string>()
   const add = (initialId: string, finalId: string, nextTone: Tone) => {
     for (const key of spellingAudioKeys(initialId, finalId, nextTone)) keys.add(key)
@@ -33,11 +33,13 @@ function nextBlendAudioKeys(ini: Initial, fin: Final, tone: Tone): string[] {
   for (const nextTone of TONES) {
     add(ini.id, fin.id, nextTone)
   }
-  for (const nextInitial of BLEND_INITIALS) {
-    add(nextInitial.id, fin.id, tone)
-  }
-  for (const nextFinal of ALL_BLEND_FINALS) {
-    add(ini.id, nextFinal.id, tone)
+  if (tone) {
+    for (const nextInitial of BLEND_INITIALS) {
+      add(nextInitial.id, fin.id, tone)
+    }
+    for (const nextFinal of ALL_BLEND_FINALS) {
+      add(ini.id, nextFinal.id, tone)
+    }
   }
 
   return [...keys]
@@ -46,25 +48,13 @@ function nextBlendAudioKeys(ini: Initial, fin: Final, tone: Tone): string[] {
 export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
   const [ini, setIni] = useState<Initial | null>(BLEND_INITIALS[0] ?? null)
   const [fin, setFin] = useState<Final | null>(BLEND_FINALS[0] ?? null)
-  const [tone, setTone] = useState<Tone>(1)
+  const [tone, setTone] = useState<Tone | null>(null)
 
-  const result = ini && fin ? toSyllable(ini.id, fin.id, tone) : null
-  const previousAudioKeyRef = useRef(result?.audioKey)
-  const spellingKeys = ini && fin ? spellingAudioKeys(ini.id, fin.id, tone) : []
-  const isWholeSyllable = result ? isWholeSyllableBase(result.base) : false
-
-  useEffect(() => {
-    if (previousAudioKeyRef.current === result?.audioKey) return
-    previousAudioKeyRef.current = result?.audioKey
-    if (result) {
-      onSpell(spellingKeys)
-      onBlended(result.audioKey)
-    } else {
-      onSpell([])
-    }
-    // 只在带调音节确实变化后播放和记录；默认展示的 bā 不自动播放（含 StrictMode）。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result?.audioKey])
+  const invalidPair = !!ini && !!fin && !isValidBlend(ini.id, fin.id)
+  const pairBase = ini && fin && !invalidPair ? blendBaseFor(ini.id, fin.id) : null
+  const result = ini && fin && tone ? toSyllable(ini.id, fin.id, tone) : null
+  const spellingKeys = ini && fin && tone ? spellingAudioKeys(ini.id, fin.id, tone) : []
+  const isWholeSyllable = pairBase ? isWholeSyllableBase(pairBase) : false
 
   useEffect(() => {
     if (!ini || !fin) return
@@ -75,15 +65,29 @@ export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
   }, [fin, ini, onPreload, tone])
 
   const selectInitial = (next: Initial) => {
+    if (ini?.id === next.id) return
+    onSpell([])
     setIni(next)
+    setTone(null)
   }
 
   const selectFinal = (next: Final) => {
+    if (fin?.id === next.id) return
+    onSpell([])
     setFin(next)
+    setTone(null)
+  }
+
+  const selectTone = (next: Tone) => {
+    if (!ini || !fin || invalidPair || tone === next) return
+    const nextResult = toSyllable(ini.id, fin.id, next)
+    if (!nextResult) return
+    setTone(next)
+    onSpell(spellingAudioKeys(ini.id, fin.id, next))
+    onBlended(nextResult.audioKey)
   }
 
   const emptyLabel = ini ? '请选择韵母' : fin ? '请选择声母' : '请选择声母和韵母'
-  const invalidPair = !!ini && !!fin && !isValidBlend(ini.id, fin.id)
 
   return (
     <div className="space-y-5">
@@ -92,9 +96,10 @@ export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
         aria-live="polite"
         className="flex min-h-32 flex-col items-center justify-center rounded-2xl border border-pinyin/30 bg-pinyin-light px-4 py-5 text-center shadow-sm"
       >
-        <div className={`${result ? 'text-5xl text-pinyin' : `text-xl ${invalidPair ? 'text-danger' : 'text-pinyin'}`} font-extrabold`}>
-          {result?.display ?? (invalidPair ? '不能拼读，换一个试试' : emptyLabel)}
+        <div className={`${result || pairBase ? 'text-5xl text-pinyin' : `text-xl ${invalidPair ? 'text-danger' : 'text-pinyin'}`} font-extrabold`}>
+          {result?.display ?? (invalidPair ? '不能拼读，换一个试试' : pairBase ?? emptyLabel)}
         </div>
+        {pairBase && !tone && <div className="mt-2 text-sm font-bold text-text-secondary">请选择声调</div>}
         {isWholeSyllable && <div className="mt-2 text-sm font-bold text-text-secondary">整体认读音节</div>}
         {result && (
           <button
@@ -161,9 +166,10 @@ export default function BlendBuilder({ onSpell, onBlended, onPreload }: Props) {
             <button
               type="button"
               key={itemTone}
-              onClick={() => setTone(itemTone)}
+              onClick={() => selectTone(itemTone)}
+              disabled={invalidPair}
               aria-pressed={tone === itemTone}
-              className={`${optionClass(tone === itemTone)} px-2 text-sm sm:text-base`}
+              className={`${optionClass(tone === itemTone)} px-2 text-sm disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 sm:text-base`}
             >
               {TONE_LABEL[itemTone]}
             </button>
